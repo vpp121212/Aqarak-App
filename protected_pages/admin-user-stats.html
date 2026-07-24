@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>إحصائيات المستخدمين - الأدمن</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <script src="admin-auth.js"></script>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="apple-touch-icon" href="logo.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+
+        "@type": "RealEstateAgent",
+
+        "name": "منصة عقارك - Aqarak",
+
+        "alternateName": ["Aqarak EG", "شركة عقارك", "Aqarak Real Estate"],
+
+        "url": "https://aqarakeg.com",
+
+        "logo": "https://aqarakeg.com/logo.jpg",
+
+        "image": "https://aqarakeg.com/logo.jpg",
+
+        "description": "منصة عقارك هي الوجهة الأولى لبيع وشراء وإيجار العقارات في مصر بأقل عمولة. نحن شركة متخصصة في توفير حلول عقارية ذكية وسريعة.",
+
+        "address": {
+          "@type": "PostalAddress",
+
+          "addressLocality": "Cairo",
+
+          "addressCountry": "EG"
+        },
+
+        "priceRange": "$",
+
+        "contactPoint": {
+          "@type": "ContactPoint",
+
+          "telephone": "+201008102237",
+
+          "contactType": "customer service",
+
+          "areaServed": "EG",
+
+          "availableLanguage": ["Arabic"]
+        },
+
+        "sameAs": [
+          "https://www.facebook.com/share/1ADgNDLXc6/",
+
+          "https://www.instagram.com/aqarak.eg?igsh=eDN2d2tuNmxhazY5",
+
+          "https://whatsapp.com/channel/0029Vb6YH08CxoAoe7aaSP38"
+        ]
+      }
+    </script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      :root {
+        --glass-bg: rgba(20, 20, 20, 0.98);
+        --neon-primary: #00ff88;
+        --neon-secondary: #00d4ff;
+        --neon-pink: #e91e63;
+        --card-bg: #1a1a1a;
+      }
+
+      body.internal-page {
+        background-color: #0f0f0f;
+        background-image: radial-gradient(
+          circle at 50% 0%,
+          #1a2c25 0%,
+          #0f0f0f 70%
+        );
+        min-height: 100vh;
+        font-family: "Cairo", sans-serif;
+        color: white;
+        overflow-x: hidden;
+        padding-top: 100px !important;
+      }
+
+      .main-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 9999;
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 15px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1250px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .logo {
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--neon-pink);
+      }
+      .logo-text {
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+
+      .nav-button {
+        text-decoration: none;
+        color: white;
+        border: 1px solid var(--neon-pink);
+        padding: 6px 20px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .nav-button:hover {
+        background: var(--neon-pink);
+        color: white;
+      }
+
+      .main-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 15px;
+      }
+
+      .stats-container {
+        background: var(--card-bg);
+        border: 1px solid #333;
+        border-radius: 16px;
+        padding: 25px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(233, 30, 99, 0.1);
+      }
+
+      .stats-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--neon-pink);
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 25px;
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .section-title i {
+        color: var(--neon-pink);
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+      }
+
+      th {
+        background: rgba(233, 30, 99, 0.15);
+        color: var(--neon-pink);
+        padding: 15px;
+        text-align: right;
+        font-weight: bold;
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 15px;
+        border-bottom: 1px solid #333;
+        color: #ddd;
+        vertical-align: middle;
+        font-size: 0.9rem;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr:hover td {
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .username-tag {
+        color: #888;
+        font-size: 0.8rem;
+        display: block;
+        margin-top: 3px;
+        font-family: monospace;
+      }
+      .banned-tag {
+        color: #ff4444;
+        font-size: 0.75rem;
+        border: 1px solid #ff4444;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-right: 5px;
+      }
+
+      .rank-badge {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+      .rank-1 {
+        background: linear-gradient(45deg, gold, orange);
+        color: black;
+        box-shadow: 0 0 10px gold;
+      }
+      .rank-2 {
+        background: linear-gradient(45deg, silver, grey);
+        color: black;
+        box-shadow: 0 0 10px silver;
+      }
+      .rank-3 {
+        background: linear-gradient(45deg, #cd7f32, #8b4513);
+        color: black;
+        box-shadow: 0 0 10px #cd7f32;
+      }
+      .rank-normal {
+        background: #333;
+        color: #aaa;
+        border: 1px solid #555;
+      }
+
+      .btn-action {
+        padding: 6px 15px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        border: 1px solid transparent;
+        background: transparent;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .btn-view {
+        border-color: var(--neon-secondary);
+        color: var(--neon-secondary);
+      }
+      .btn-view:hover {
+        background: var(--neon-secondary);
+        color: black;
+      }
+
+      @media (max-width: 768px) {
+        body.internal-page {
+          padding-top: 130px !important;
+        }
+        .logo-text {
+          display: none;
+        }
+        .stats-container {
+          padding: 15px;
+        }
+        th,
+        td {
+          padding: 12px 10px;
+        }
+        .btn-action span {
+          display: none;
+        }
+        .btn-action i {
+          font-size: 1rem;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="internal-page">
+    <header class="main-header">
+      <div class="header-container">
+        <div class="logo-container">
+          <img src="logo.jpg" alt="شعار عقارك" class="logo" />
+          <span class="logo-text">الإحصائيات (Admin)</span>
+        </div>
+        <nav class="main-nav">
+          <a href="admin-home" class="nav-button">
+            العودة للرئيسية
+            <i class="fas fa-arrow-left" style="margin-right: 5px"></i>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="stats-container">
+        <h2 class="section-title">
+          <i class="fas fa-chart-line"></i> ترتيب النشاط والحظر
+        </h2>
+
+        <div
+          id="loading"
+          style="text-align: center; color: var(--neon-pink); margin: 40px"
+        >
+          <i class="fas fa-spinner fa-spin fa-2x"></i><br /><span
+            style="margin-top: 10px; display: block"
+            >جاري تحليل البيانات...</span
+          >
+        </div>
+
+        <div class="table-responsive">
+          <table id="stats-table" style="display: none">
+            <thead>
+              <tr>
+                <th style="width: 60px">#</th>
+                <th>المستخدم</th>
+                <th>الهاتف</th>
+                <th>العقارات</th>
+                <th style="text-align: center">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="stats-body"></tbody>
+          </table>
+        </div>
+
+        <p
+          id="empty-msg"
+          style="
+            display: none;
+            text-align: center;
+            color: #777;
+            margin-top: 30px;
+            border: 1px dashed #444;
+            padding: 20px;
+            border-radius: 10px;
+          "
+        >
+          لا يوجد مستخدمين مسجلين حالياً.
+        </p>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", fetchStats);
+
+      async function fetchStats() {
+        const table = document.getElementById("stats-table");
+        const tbody = document.getElementById("stats-body");
+        const loading = document.getElementById("loading");
+        const emptyMsg = document.getElementById("empty-msg");
+
+        try {
+          const response = await fetch("/api/admin/users-stats");
+
+          if (response.status === 401 || response.status === 403) {
+            window.location.href = "index";
+            return;
+          }
+
+          const users = await response.json();
+          console.log("Users Data:", users);
+
+          loading.style.display = "none";
+
+          if (users.length === 0) {
+            emptyMsg.style.display = "block";
+            return;
+          }
+
+          table.style.display = "table";
+          tbody.innerHTML = "";
+
+          users.forEach((user, index) => {
+            let rankClass = "rank-normal";
+            let rankContent = index + 1;
+
+            if (index === 0) {
+              rankClass = "rank-1";
+              rankContent = '<i class="fas fa-trophy"></i>';
+            } else if (index === 1) {
+              rankClass = "rank-2";
+              rankContent = "2";
+            } else if (index === 2) {
+              rankClass = "rank-3";
+              rankContent = "3";
+            }
+
+            let rawBan = user.is_banned ?? user.isBanned ?? user.banned;
+
+            const isBanned =
+              rawBan === true ||
+              rawBan === 1 ||
+              rawBan === "1" ||
+              rawBan === "true";
+
+            const banBtnText = isBanned ? "فك الحظر" : "حظر";
+            const banBtnColor = isBanned ? "#4caf50" : "#ff4444";
+            const banIcon = isBanned ? "fa-unlock" : "fa-ban";
+
+            const btnId = `ban-btn-${user.phone}`;
+            const rowId = `row-${user.phone}`;
+
+            const row = `
+                    <tr id="${rowId}" style="${
+              isBanned ? "background: rgba(255, 68, 68, 0.1);" : ""
+            }">
+                        <td><div class="rank-badge ${rankClass}">${rankContent}</div></td>
+                        <td>
+                            <div style="font-weight:bold; color:white;">
+                                ${user.name || "مستخدم"}
+                                ${
+                                  isBanned
+                                    ? `<span class="banned-tag" id="ban-tag-${user.phone}">محظور</span>`
+                                    : `<span id="ban-tag-${user.phone}" style="display:none;" class="banned-tag">محظور</span>`
+                                }
+                            </div>
+                            <span class="username-tag">@${
+                              user.username || "unknown"
+                            }</span>
+                        </td>
+                        <td style="direction: ltr; text-align: right; font-family:monospace; color:#ccc;">${
+                          user.phone
+                        }</td>
+                        <td><span style="color: var(--neon-primary); font-weight:bold;">${
+                          user.property_count
+                        } عقار</span></td>
+                        <td>
+                            <div style="display:flex; gap:8px; justify-content:center;">
+                                <a href="user-profile.html?u=${
+                                  user.username
+                                }" target="_blank" class="btn-action btn-view">
+                                    <i class="fas fa-eye"></i> <span>بروفايل</span>
+                                </a>
+                                <button id="${btnId}" 
+                                        onclick="toggleBan('${user.phone}')" 
+                                        class="btn-action" 
+                                        data-banned="${isBanned}"
+                                        style="border-color: ${banBtnColor}; color: ${banBtnColor};">
+                                    <i class="fas ${banIcon}"></i> <span>${banBtnText}</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            tbody.innerHTML += row;
+          });
+        } catch (error) {
+          console.error(error);
+          loading.innerHTML =
+            '<span style="color:#ff4444"><i class="fas fa-exclamation-triangle"></i> فشل تحميل البيانات</span>';
+        }
+      }
+      async function toggleBan(phone) {
+        const btn = document.getElementById(`ban-btn-${phone}`);
+        const row = document.getElementById(`row-${phone}`);
+        const tag = document.getElementById(`ban-tag-${phone}`);
+
+        const isCurrentlyBanned = btn.getAttribute("data-banned") === "true";
+        const action = !isCurrentlyBanned;
+
+        if (
+          !confirm(
+            action
+              ? "🚫 هل أنت متأكد من حظر هذا المستخدم؟\nسيتم منعه من دخول الموقع."
+              : "✅ هل تريد فك الحظر عن هذا المستخدم؟"
+          )
+        )
+          return;
+
+        const oldContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+
+        try {
+          const res = await fetch("/api/admin/toggle-ban", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone, shouldBan: action }),
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            btn.setAttribute("data-banned", action);
+
+            if (action) {
+              btn.innerHTML =
+                '<i class="fas fa-unlock"></i> <span>فك الحظر</span>';
+              btn.style.borderColor = "#4caf50";
+              btn.style.color = "#4caf50";
+              row.style.background = "rgba(255, 68, 68, 0.1)";
+              tag.style.display = "inline-block";
+            } else {
+              btn.innerHTML = '<i class="fas fa-ban"></i> <span>حظر</span>';
+              btn.style.borderColor = "#ff4444";
+              btn.style.color = "#ff4444";
+              row.style.background = "transparent";
+              tag.style.display = "none";
+            }
+          } else {
+            alert("❌ حدث خطأ: " + data.message);
+            btn.innerHTML = oldContent;
+          }
+        } catch (e) {
+          alert("خطأ في الاتصال");
+          btn.innerHTML = oldContent;
+        } finally {
+          btn.disabled = false;
+        }
+      }
+      async function toggleUserBan(phone, shouldBan) {
+        if (
+          !confirm(
+            shouldBan
+              ? "هل أنت متأكد من حظر هذا المستخدم وإخفاء عقاراته؟"
+              : "فك الحظر؟"
+          )
+        )
+          return;
+
+        try {
+          const res = await fetch("/api/admin/toggle-ban", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: phone, isBanned: shouldBan }),
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert("خطأ: " + data.message);
+          }
+        } catch (e) {
+          console.error(e);
+          alert("خطأ في الاتصال");
+        }
+      }
+    </script>
+    <script src="global-alert.js"></script>
+  </body>
+</html>

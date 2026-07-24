@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>من نحن - فريق عقارك</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+
+    <style>
+      :root {
+        --glass-bg: rgba(20, 20, 20, 0.95);
+        --neon-primary: #00ff88;
+        --neon-secondary: #00d4ff;
+        --neon-gold: #ffd700;
+        --neon-purple: #e91e63;
+        --text-gray: #aaa;
+      }
+
+      body {
+        background-color: #0f0f0f;
+        background-image: radial-gradient(
+          circle at 50% 0%,
+          #1a2c25 0%,
+          #0f0f0f 70%
+        );
+        min-height: 100vh;
+        font-family: "Cairo", sans-serif;
+        color: white;
+        margin: 0;
+        padding-top: 80px;
+        overflow-x: hidden;
+      }
+
+      .main-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 0;
+      }
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      }
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 8px 20px;
+        border: 1px solid var(--neon-secondary);
+        border-radius: 50px;
+        transition: 0.3s;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-link:hover {
+        background: var(--neon-secondary);
+        color: black;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+      }
+
+      .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .delay-1 {
+        transition-delay: 0.1s;
+      }
+      .delay-2 {
+        transition-delay: 0.2s;
+      }
+      .delay-3 {
+        transition-delay: 0.3s;
+      }
+
+      @keyframes floatImg {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-15px);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+        50% {
+          box-shadow: 0 0 25px rgba(0, 255, 136, 0.5);
+        }
+        100% {
+          box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+      }
+      @keyframes fadeInUpHero {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero-section {
+        text-align: center;
+        padding: 60px 20px;
+        animation: fadeInUpHero 1s ease-out forwards;
+      }
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #fff 30%, var(--neon-primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-subtitle {
+        color: var(--text-gray);
+        max-width: 750px;
+        margin: 0 auto;
+        line-height: 1.8;
+        font-size: 1.1rem;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        max-width: 1100px;
+        margin: 60px auto;
+        padding: 0 20px;
+      }
+      .feature-card {
+        background: rgba(30, 30, 30, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        transition: 0.3s;
+      }
+      .feature-card:hover {
+        transform: translateY(-10px) !important;
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--neon-primary);
+      }
+      .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: var(--neon-primary);
+        transition: 0.4s;
+      }
+      .feature-card:hover .feature-icon {
+        transform: scale(1.2) rotate(10deg);
+      }
+
+      .story-section {
+        max-width: 1100px;
+        margin: 80px auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        gap: 50px;
+        border: 1px solid rgba(0, 212, 255, 0.2);
+      }
+      .story-img {
+        flex: 1;
+        max-width: 350px;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+      .story-img img {
+        width: 100%;
+        height: auto;
+        animation: floatImg 6s ease-in-out infinite;
+      }
+      .story-content {
+        flex: 2;
+      }
+      .story-content h2 {
+        color: var(--neon-secondary);
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+      .story-content p {
+        color: #ddd;
+        line-height: 1.8;
+        margin-bottom: 15px;
+      }
+
+      .stats-container {
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+        flex-wrap: wrap;
+        margin: 80px auto;
+        padding: 40px 20px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 255, 136, 0.05),
+          transparent
+        );
+        border-top: 1px solid #333;
+        border-bottom: 1px solid #333;
+      }
+      .stat-box {
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: white;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .stat-label {
+        color: var(--neon-primary);
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+      }
+
+      .founders-section {
+        max-width: 1100px;
+        margin: 80px auto;
+        padding: 0 20px;
+      }
+      .founders-grid {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+
+      .founder-card {
+        background: rgba(30, 30, 30, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 25px;
+        width: 350px;
+        overflow: hidden;
+        position: relative;
+        text-align: center;
+        transition: 0.4s ease;
+      }
+
+      .founder-card:hover {
+        transform: translateY(-15px) scale(1.02) !important;
+        border-color: var(--neon-secondary);
+        box-shadow: 0 15px 40px rgba(0, 212, 255, 0.15);
+      }
+
+      .img-wrapper {
+        width: 100%;
+        height: 300px;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: 0.5s;
+        filter: grayscale(20%);
+      }
+      .founder-card:hover .img-wrapper img {
+        transform: scale(1.1);
+        filter: grayscale(0%);
+      }
+
+      .founder-info {
+        padding: 25px;
+      }
+      .founder-name {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 5px;
+      }
+      .founder-role {
+        color: var(--neon-primary);
+        font-size: 0.9rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: block;
+        margin-bottom: 15px;
+        transition: 0.3s;
+      }
+      .founder-card:hover .founder-role {
+        color: var(--neon-secondary);
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+      }
+
+      .role-badges {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+      }
+      .role-badge {
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        color: #000;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .badge-law {
+        background: var(--neon-gold);
+      }
+      .badge-tech {
+        background: var(--neon-secondary);
+      }
+      .badge-biz {
+        background: var(--neon-purple);
+        color: white;
+      }
+
+      .founder-bio {
+        color: #ccc;
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      .contact-btn-wrapper {
+        text-align: center;
+        margin-bottom: 60px;
+      }
+      .whatsapp-contact-btn {
+        background: #25d366;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.2rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        animation: glowPulse 2s infinite;
+        transition: 0.3s;
+      }
+      .whatsapp-contact-btn:hover {
+        transform: scale(1.05);
+      }
+
+      @media (max-width: 900px) {
+        .story-section {
+          flex-direction: column;
+          text-align: center;
+          padding: 30px 20px;
+        }
+        .story-img {
+          width: 100%;
+          margin-bottom: 20px;
+        }
+        .founders-grid {
+          flex-direction: column;
+          align-items: center;
+        }
+        .founder-card {
+          width: 100%;
+          max-width: 340px;
+        }
+        .hero-title {
+          font-size: 2.2rem;
+        }
+        .stats-container {
+          gap: 30px;
+        }
+      }
+      @keyframes float-pulse {
+        0% {
+          transform: translateY(0) scale(1);
+          box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+        }
+        50% {
+          transform: translateY(-8px) scale(1.03);
+          box-shadow: 0 15px 25px rgba(13, 110, 253, 0.3);
+        }
+        100% {
+          transform: translateY(0) scale(1);
+          box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+        }
+      }
+
+      .founder-img {
+        width: 160px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        animation: float-pulse 4s ease-in-out infinite;
+        margin-bottom: 15px;
+      }
+      .founder-img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--neon-primary);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        animation: float-pulse 4s ease-in-out infinite;
+      }
+
+      @keyframes float-pulse {
+        0% {
+          transform: translateY(0) scale(1);
+          box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+        }
+        50% {
+          transform: translateY(-10px) scale(1.05);
+          box-shadow: 0 15px 25px rgba(0, 255, 136, 0.4);
+        }
+        100% {
+          transform: translateY(0) scale(1);
+          box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="main-header">
+      <div class="header-content">
+        <a
+          href="home"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+          "
+        >
+          <img
+            src="logo.jpg"
+            alt="Logo"
+            style="
+              width: 40px;
+              border-radius: 50%;
+              border: 2px solid var(--neon-primary);
+            "
+          />
+          <span style="color: white; font-weight: bold; font-size: 1.2rem"
+            >عقارك</span
+          >
+        </a>
+        <a href="home" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
+      </div>
+    </header>
+
+    <section class="hero-section">
+      <h1 class="hero-title">المنصة العقارية الأذكى في مصر</h1>
+      <p class="hero-subtitle">
+        عندما يجتمع <strong>القانون</strong> مع <strong>التكنولوجيا</strong>.
+        <br />
+        رؤية شبابية تهدف لتنظيم السوق العقاري المصري بأحدث تقنيات الذكاء
+        الاصطناعي وبأساس قانوني متين لحماية حقوق الجميع.
+      </p>
+    </section>
+
+    <section class="features-grid">
+      <div class="feature-card reveal delay-1">
+        <i class="fas fa-robot feature-icon"></i>
+        <h3 style="color: white; margin-bottom: 10px">ذكاء اصطناعي حقيقي</h3>
+        <p style="color: #aaa">
+          نظامنا بيفهم طلبك بدقة، وبيعمل "Match" ذكي بين البائع والمشتري لتوفير
+          وقتك ومجهودك.
+        </p>
+      </div>
+
+      <div class="feature-card reveal delay-2">
+        <i class="fas fa-balance-scale feature-icon" style="color: #00d4ff"></i>
+        <h3 style="color: white; margin-bottom: 10px">أمان قانوني</h3>
+        <p style="color: #aaa">
+          بفضل خلفيتنا القانونية، نهتم بمراجعة العقارات والتحقق من المستخدمين
+          لضمان بيئة خالية من النصب.
+        </p>
+      </div>
+
+      <div class="feature-card reveal delay-3">
+        <i class="fas fa-users-cog feature-icon" style="color: #ffd700"></i>
+        <h3 style="color: white; margin-bottom: 10px">سوق عقاري متكامل</h3>
+        <p style="color: #aaa">
+          منصتنا تجمع الملاك والوسطاء المحترفين في مكان واحد. هدفنا هو توفير
+          أكبر تنوع من العقارات أمامك، مع ضمان تواصل مباشر وشفاف مع المعلن.
+        </p>
+      </div>
+    </section>
+
+    <section class="story-section reveal">
+      <div class="story-img">
+        <img src="logo.png" alt="Aqarak Vision" loading="lazy" />
+      </div>
+      <div class="story-content">
+        <h2>رؤيتنا وهدفنا</h2>
+        <p>
+          بدأت فكرة "عقارك" من قلب المعاناة في السوق المصري: فجوة كبيرة بين
+          المالك والمشتري، وسيطرة العشوائية.
+        </p>
+        <p>
+          قررنا ندمج <strong>التكنولوجيا (AI & SEO)</strong> مع
+          <strong>الخبرة القانونية والإدارية</strong> لنقدم منصة تحترم عقل
+          المستخدم. سواء كنت بائعًا تبحث عن مشترٍ جاد، أو مشتريًا يبحث عن أمان،
+          "عقارك" هو دليلك.
+        </p>
+      </div>
+    </section>
+
+    <section class="stats-container reveal">
+      <div class="stat-box">
+        <span class="stat-number" id="live-prop-count">...</span>
+        <span class="stat-label">عقار متاح الآن</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-number" id="live-user-count">500+</span>
+        <span class="stat-label">مستخدم يثق بنا</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-number">24/7</span>
+        <span class="stat-label">دعم فني</span>
+      </div>
+    </section>
+
+    <section class="founders-section">
+      <h2
+        class="reveal"
+        style="
+          text-align: center;
+          margin-bottom: 50px;
+          font-size: 2.2rem;
+          color: white;
+        "
+      >
+        فريق القيادة
+      </h2>
+      <div class="founders-grid">
+        <div class="founder-card reveal delay-1">
+          <div style="text-align: center; padding-top: 25px">
+            <img
+              src="qassim.jpg"
+              alt="Qassim Ahmed"
+              class="founder-img"
+              onerror="this.src='logo.jpg'"
+              loading="lazy"
+            />
+          </div>
+
+          <div class="founder-info">
+            <h3 class="founder-name">قاسم أحمد</h3>
+            <span class="founder-role">المؤسس & المدير التنفيذي (CEO)</span>
+
+            <div class="role-badges">
+              <span class="role-badge badge-law"
+                ><i class="fas fa-balance-scale"></i> قانوني</span
+              >
+              <span class="role-badge badge-tech"
+                ><i class="fas fa-code"></i> مبرمج Full-Stack</span
+              >
+              <span class="role-badge badge-tech"
+                ><i class="fab fa-google"></i> خبير SEO</span
+              >
+            </div>
+
+            <p class="founder-bio">
+              طالب في المجال القانوني، وهو العقل المدبر وراء البنية البرمجية
+              للمنصة. يجمع بين الخبرة القانونية لضمان سلامة التعاملات، والمهارة
+              التقنية العالية لضمان ظهور العقارات في صدارة محركات البحث.
+            </p>
+          </div>
+        </div>
+
+        <div class="founder-card reveal delay-2">
+          <div style="text-align: center; padding-top: 25px">
+            <img
+              src="ammar.jpg"
+              alt="Ammar Mohsen"
+              class="founder-img"
+              onerror="this.src='logo.jpg'"
+              loading="lazy"
+            />
+          </div>
+
+          <div class="founder-info">
+            <h3 class="founder-name">عمار محسن</h3>
+            <span class="founder-role"
+              >الشريك المؤسس & مدير العمليات (COO)</span
+            >
+
+            <div class="role-badges">
+              <span class="role-badge badge-biz"
+                ><i class="fas fa-chart-line"></i> إدارة أعمال</span
+              >
+              <span class="role-badge badge-biz"
+                ><i class="fas fa-lightbulb"></i> تسويق</span
+              >
+              <span class="role-badge badge-biz"
+                ><i class="fas fa-tasks"></i> إدارة عمليات</span
+              >
+            </div>
+
+            <p class="founder-bio">
+              طالب إدارة أعمال، والمسؤول الأول عن الاستراتيجيات والتطوير
+              الإداري. يقود فريق التسويق ويحول الأفكار الإبداعية إلى واقع ملموس،
+              مما يضمن نمو المنصة وانتشارها القوي في السوق.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="contact-btn-wrapper reveal delay-3">
+      <h3 style="color: white; margin-bottom: 20px">
+        هل لديك استفسار أو اقتراح؟
+      </h3>
+      <a
+        href="https://wa.me/201008102237"
+        target="_blank"
+        class="whatsapp-contact-btn"
+      >
+        <i class="fab fa-whatsapp"></i> تواصل معنا مباشرة
+      </a>
+    </div>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 30px;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 50px;
+        border-top: 1px solid #222;
+      "
+    >
+      <p>جميع الحقوق محفوظة © 2025 - عقارك</p>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const revealElements = document.querySelectorAll(".reveal");
+
+        const revealOnScroll = () => {
+          const windowHeight = window.innerHeight;
+          const elementVisible = 150;
+
+          revealElements.forEach((el) => {
+            const elementTop = el.getBoundingClientRect().top;
+            if (elementTop < windowHeight - elementVisible) {
+              el.classList.add("active");
+            }
+          });
+        };
+
+        window.addEventListener("scroll", revealOnScroll);
+        revealOnScroll();
+
+        try {
+          const res = await fetch("/api/public/stats");
+          if (res.ok) {
+            const data = await res.json();
+            animateValue("live-prop-count", 0, data.properties, 2000);
+            animateValue("live-user-count", 0, data.users, 2000);
+          } else {
+            document.getElementById("live-prop-count").textContent = "+50";
+          }
+        } catch (e) {
+          console.error("Error fetching stats:", e);
+          document.getElementById("live-prop-count").textContent = "+50";
+        }
+      });
+
+      function animateValue(id, start, end, duration) {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        if (end === 0) {
+          obj.innerHTML = "0";
+          return;
+        }
+        let startTimestamp = null;
+        const step = (timestamp) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          obj.innerHTML = Math.floor(progress * (end - start) + start);
+          if (progress < 1) {
+            window.requestAnimationFrame(step);
+          } else {
+            obj.innerHTML = end;
+          }
+        };
+        window.requestAnimationFrame(step);
+      }
+    </script>
+  </body>
+</html>

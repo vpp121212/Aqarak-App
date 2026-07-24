@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>شركاء النجاح - عقارك</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+
+    <style>
+      :root {
+        --bg-dark: #0f0f0f;
+        --glass-bg: rgba(30, 30, 30, 0.6);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --neon-primary: #00ff88;
+        --neon-secondary: #00d4ff;
+        --neon-gold: #ffd700;
+        --text-main: #ffffff;
+        --text-muted: #aaaaaa;
+      }
+
+      * {
+        box-sizing: border-box;
+        outline: none;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-dark);
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(0, 255, 136, 0.05) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(0, 212, 255, 0.05) 0%,
+            transparent 40%
+          );
+        font-family: "Cairo", sans-serif;
+        color: var(--text-main);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .main-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: rgba(20, 20, 20, 0.9);
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 15px 0;
+      }
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .logo-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--neon-primary);
+      }
+      .logo-text {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: white;
+      }
+
+      .nav-btn {
+        color: white;
+        text-decoration: none;
+        padding: 8px 20px;
+        border: 1px solid var(--neon-secondary);
+        border-radius: 50px;
+        transition: 0.3s;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-btn:hover {
+        background: var(--neon-secondary);
+        color: black;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+      }
+
+      .hero-section {
+        text-align: center;
+        padding: 120px 20px 40px;
+      }
+      .hero-title {
+        font-size: 2.8rem;
+        margin-bottom: 15px;
+        background: linear-gradient(90deg, #fff, var(--neon-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: fadeInDown 1s ease-out;
+      }
+      .hero-desc {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+        animation: fadeIn 1.5s ease-out;
+      }
+
+      .services-container {
+        max-width: 1200px;
+        margin: 0 auto 60px;
+        padding: 0 20px;
+      }
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+      }
+
+      .service-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: center;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        backdrop-filter: blur(10px);
+      }
+
+      .service-card.pinned {
+        border-color: var(--neon-gold);
+        background: linear-gradient(
+          145deg,
+          rgba(255, 215, 0, 0.05),
+          rgba(20, 20, 20, 0.8)
+        );
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+      }
+      .service-card.pinned::after {
+        content: "شريك مميز";
+        position: absolute;
+        top: 15px;
+        right: -30px;
+        background: var(--neon-gold);
+        color: black;
+        font-size: 0.7rem;
+        font-weight: bold;
+        padding: 5px 30px;
+        transform: rotate(45deg);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .service-card:hover {
+        transform: translateY(-10px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      }
+      .service-card.pinned:hover {
+        border-color: var(--neon-gold);
+        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+      }
+
+      .card-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: #1a1a1a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+        border: 2px solid #333;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        transition: 0.4s;
+        position: relative;
+        z-index: 2;
+      }
+      .service-card.pinned .card-icon-wrapper {
+        border-color: var(--neon-gold);
+      }
+
+      .service-card:hover .card-icon-wrapper {
+        border-color: var(--neon-primary);
+        transform: scale(1.1) rotate(5deg);
+      }
+      .service-card.pinned:hover .card-icon-wrapper {
+        border-color: var(--neon-gold);
+      }
+
+      .card-icon-wrapper img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        filter: grayscale(100%);
+        transition: 0.4s;
+      }
+      .service-card:hover .card-icon-wrapper img {
+        filter: grayscale(0%);
+      }
+      .service-card.pinned .card-icon-wrapper img {
+        filter: grayscale(0%);
+      }
+
+      .card-title {
+        color: white;
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        transition: 0.3s;
+      }
+      .service-card:hover .card-title {
+        color: var(--neon-primary);
+      }
+      .service-card.pinned .card-title {
+        color: var(--neon-gold);
+      }
+
+      .card-desc {
+        color: #999;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        flex-grow: 1;
+      }
+
+      .card-btn {
+        padding: 10px 30px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+        border: 1px solid;
+      }
+      .btn-web {
+        border-color: var(--neon-secondary);
+        color: var(--neon-secondary);
+      }
+      .service-card:hover .btn-web {
+        background: var(--neon-secondary);
+        color: black;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+      }
+      .btn-fb {
+        border-color: #1877f2;
+        color: #1877f2;
+      }
+      .service-card:hover .btn-fb {
+        background: #1877f2;
+        color: white;
+        box-shadow: 0 0 15px rgba(24, 119, 242, 0.4);
+      }
+
+      .loading-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-size: 1.1rem;
+        grid-column: 1/-1;
+      }
+      .coming-soon-card {
+        border-style: dashed;
+        border-color: #444;
+        opacity: 0.7;
+        grid-column: 1/-1;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .reveal {
+        animation: popIn 0.6s ease-out forwards;
+        opacity: 0;
+      }
+
+      footer {
+        text-align: center;
+        padding: 30px;
+        color: #666;
+        border-top: 1px solid var(--glass-border);
+        background: rgba(10, 10, 10, 0.8);
+      }
+
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+        .services-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="main-header">
+      <div class="header-content">
+        <a href="home" class="logo-area">
+          <img src="logo.jpg" alt="عقارك" class="logo-img" />
+          <span class="logo-text">عقارك</span>
+        </a>
+        <a href="home" class="nav-btn"><i class="fas fa-home"></i> الرئيسية</a>
+      </div>
+    </header>
+
+    <section class="hero-section">
+      <h1 class="hero-title">شركاء النجاح والخدمات</h1>
+      <p class="hero-desc">
+        نخبة من أفضل الشركات والخدمات التي نثق بها لخدمة منزلك.
+      </p>
+    </section>
+
+    <main class="services-container">
+      <div id="services-grid" class="services-grid"></div>
+    </main>
+
+    <footer><p>جميع الحقوق محفوظة © 2025 - منصة عقارك</p></footer>
+
+    <script src="ban-check.js"></script>
+    <script src="global-alert.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const container = document.getElementById("services-grid");
+
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; margin-bottom: 15px; color: var(--neon-secondary);"></i>
+                <p>جاري تحميل الخدمات...</p>
+            </div>`;
+
+        try {
+          const res = await fetch("/api/services");
+          const services = await res.json();
+          container.innerHTML = "";
+
+          if (services.length === 0) {
+            container.innerHTML = `
+                <div class="service-card coming-soon-card reveal">
+                    <div class="card-icon-wrapper"><i class="fas fa-rocket" style="font-size: 40px; color: #555;"></i></div>
+                    <h3 class="card-title" style="color:#777">قريباً..</h3>
+                    <p class="card-desc">انتظروا شركاء جدد قريباً.</p>
+                </div>`;
+            return;
+          }
+
+          services.forEach((service, index) => {
+            const isFb = service.link_type === "facebook";
+            const isPinned = service.is_pinned;
+
+            const icon = isFb
+              ? '<i class="fab fa-facebook-f"></i>'
+              : '<i class="fas fa-globe"></i>';
+            const btnText = isFb ? "زيارة الصفحة" : "زيارة الموقع";
+            const btnClass = isFb ? "btn-fb" : "btn-web";
+            const pinnedClass = isPinned ? "pinned" : "";
+
+            const cardHTML = `
+                <a href="${
+                  service.link_url
+                }" target="_blank" class="service-card ${pinnedClass} reveal" style="animation-delay: ${
+              index * 100
+            }ms">
+                    <div class="card-icon-wrapper">
+                        <img src="${service.image_url}" alt="${
+              service.title
+            }" onerror="this.src='logo.jpg'" loading="lazy">
+                    </div>
+                    <h3 class="card-title">${service.title}</h3>
+                    <p class="card-desc">${service.description}</p>
+                    <div class="card-btn ${btnClass}">
+                        ${btnText} ${icon}
+                    </div>
+                </a>
+            `;
+            container.insertAdjacentHTML("beforeend", cardHTML);
+          });
+        } catch (e) {
+          container.innerHTML = `<div class="loading-state" style="color:#ff4444;">حدث خطأ في الاتصال</div>`;
+        }
+      });
+    </script>
+  </body>
+</html>

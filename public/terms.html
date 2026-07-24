@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الشروط والأحكام - عقارك</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+
+    <style>
+      :root {
+        --glass-bg: rgba(20, 20, 20, 0.95);
+        --neon-primary: #00ff88;
+        --neon-secondary: #00d4ff;
+        --text-gray: #aaa;
+      }
+
+      body {
+        background-color: #0f0f0f;
+        background-image: radial-gradient(
+          circle at 50% 0%,
+          #1a2c25 0%,
+          #0f0f0f 70%
+        );
+        min-height: 100vh;
+        font-family: "Cairo", sans-serif;
+        color: white;
+        margin: 0;
+        padding-top: 80px;
+        overflow-x: hidden;
+        line-height: 1.8;
+      }
+
+      .main-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 0;
+      }
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      }
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 6px 15px;
+        border: 1px solid var(--neon-primary);
+        border-radius: 20px;
+        font-size: 0.9rem;
+        transition: 0.3s;
+      }
+      .nav-link:hover {
+        background: var(--neon-primary);
+        color: black;
+      }
+
+      .terms-container {
+        max-width: 950px;
+        margin: 40px auto;
+        padding: 50px;
+        background: rgba(30, 30, 30, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--neon-primary);
+        margin-bottom: 40px;
+        font-size: 2.5rem;
+        position: relative;
+
+        display: table;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      h1::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 60%;
+        height: 3px;
+        background: var(--neon-secondary);
+        border-radius: 2px;
+      }
+      h2 {
+        color: var(--neon-secondary);
+        font-size: 1.3rem;
+        margin-top: 40px;
+        margin-bottom: 15px;
+        border-right: 4px solid var(--neon-secondary);
+        padding-right: 15px;
+        background: linear-gradient(
+          90deg,
+          rgba(0, 212, 255, 0.05),
+          transparent
+        );
+        padding-top: 5px;
+        padding-bottom: 5px;
+        border-radius: 5px;
+      }
+
+      p {
+        color: #ddd;
+        margin-bottom: 15px;
+        text-align: justify;
+        font-size: 0.95rem;
+      }
+
+      ul {
+        margin-bottom: 20px;
+        padding-right: 20px;
+        color: #ccc;
+      }
+      li {
+        margin-bottom: 10px;
+        list-style-type: square;
+      }
+
+      strong {
+        color: white;
+        font-weight: bold;
+      }
+
+      .last-update {
+        text-align: center;
+        color: #777;
+        font-size: 0.9rem;
+        margin-bottom: 40px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 20px;
+      }
+
+      .highlight-box {
+        background: rgba(255, 68, 68, 0.1);
+        border: 1px solid rgba(255, 68, 68, 0.3);
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        font-size: 0.9rem;
+        color: #ffcccc;
+      }
+
+      .hidden-el {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
+      }
+
+      .show-el {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .delay-1 {
+        transition-delay: 0.1s;
+      }
+      .delay-2 {
+        transition-delay: 0.2s;
+      }
+
+      @media (max-width: 768px) {
+        .terms-container {
+          padding: 20px;
+          margin: 20px 10px;
+        }
+        h1 {
+          font-size: 1.8rem;
+        }
+        h2 {
+          font-size: 1.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="main-header">
+      <div class="header-content">
+        <a
+          href="home"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+          "
+        >
+          <img
+            src="logo.png"
+            alt="Logo"
+            style="
+              width: 40px;
+              border-radius: 50%;
+              border: 2px solid var(--neon-primary);
+            "
+          />
+          <span style="color: white; font-weight: bold; font-size: 1.2rem"
+            >عقارك</span
+          >
+        </a>
+        <a href="home" class="nav-link"><i class="fas fa-home"></i> الرئيسية</a>
+      </div>
+    </header>
+
+    <div class="terms-container">
+      <h1 class="hidden-el">الشروط والأحكام</h1>
+      <p class="last-update hidden-el delay-1">آخر تحديث: ديسمبر 2025</p>
+
+      <p class="hidden-el delay-2">
+        أهلاً بك في منصة <strong>"عقارك"</strong>. تمثل هذه الشروط والأحكام
+        عقداً ملزماً قانوناً بينك (بصفتك "المستخدم") وبين إدارة منصة عقارك.
+        باستخدامك لهذا الموقع، فإنك تقر بأنك قد قرأت وفهمت ووافقت على الالتزام
+        بجميع البنود الواردة أدناه.
+      </p>
+
+      <h2 class="hidden-el">1. التعريفات</h2>
+      <ul class="hidden-el">
+        <li>
+          <strong>المنصة / الموقع:</strong> يُقصد بها موقع وتطبيق "عقارك" وكافة
+          الخدمات المرتبطة به.
+        </li>
+        <li>
+          <strong>المستخدم:</strong> أي شخص يقوم بزيارة الموقع، أو التسجيل فيه،
+          سواء كان بائعاً، مؤجراً، مشترياً، أو متصفحاً.
+        </li>
+        <li>
+          <strong>المحتوى:</strong> كافة النصوص، الصور، البيانات، والمعلومات
+          العقارية المنشورة على المنصة.
+        </li>
+      </ul>
+
+      <h2 class="hidden-el">2. الأهلية القانونية والتسجيل</h2>
+      <p class="hidden-el">
+        بإنشاء حساب على منصة عقارك، فإنك تقر وتضمن ما يلي:
+      </p>
+      <ul class="hidden-el">
+        <li>
+          أنك تتمتع بالأهلية القانونية الكاملة للتعاقد (ألا يقل عمرك عن 18
+          عاماً).
+        </li>
+        <li>
+          أن جميع البيانات المقدمة أثناء التسجيل (الاسم الحقيقي، رقم الهاتف،
+          البريد الإلكتروني) هي بيانات صحيحة ودقيقة ومحدثة.
+        </li>
+        <li>
+          أنت المسؤول الوحيد عن الحفاظ على سرية معلومات الدخول الخاصة بك، وتتحمل
+          المسؤولية الكاملة عن أي نشاط يحدث تحت حسابك.
+        </li>
+      </ul>
+
+      <h2 class="hidden-el">3. ضوابط النشر والإعلانات العقارية</h2>
+      <p class="hidden-el">
+        يلتزم المستخدم عند نشر أي إعلان عقاري بالسياسات الصارمة التالية لضمان
+        جودة المحتوى:
+      </p>
+      <ul class="hidden-el">
+        <li>
+          <strong>الملكية والتفويض:</strong> يجب أن يكون المعلن هو المالك الفعلي
+          للعقار أو وسيطاً عقارياً مفوضاً قانونياً بنشره.
+        </li>
+        <li>
+          <strong>مصداقية الصور:</strong> يُحظر استخدام صور مضللة، أو صور تحتوي
+          على شعارات مائية لمنافسين، أو صور لا تمت للوحدة العقارية بصلة.
+        </li>
+        <li>
+          <strong>دقة البيانات:</strong> يجب الإفصاح عن تفاصيل العقار (السعر،
+          المساحة، الموقع، التشطيب) بدقة متناهية ودون تلاعب.
+        </li>
+        <li>
+          <strong>التحديث المستمر:</strong> يلتزم المعلن بحذف الإعلان أو تحديث
+          حالته فور بيع الوحدة أو تأجيرها.
+        </li>
+        <li>
+          يحتفظ الموقع بالحق في حذف أي إعلان يخالف هذه الضوابط دون سابق إنذار.
+        </li>
+      </ul>
+
+      <h2 class="hidden-el">4. الاستخدام المحظور</h2>
+      <p class="hidden-el">يُحظر على المستخدم القيام بأي مما يلي:</p>
+      <ul class="hidden-el">
+        <li>استخدام المنصة لأغراض غير قانونية أو احتيالية.</li>
+        <li>نشر محتوى ينتهك حقوق الملكية الفكرية للغير.</li>
+        <li>
+          محاولة اختراق الموقع، أو جمع بيانات المستخدمين (Scraping) بأي وسيلة
+          آلية.
+        </li>
+        <li>نشر إعلانات وهمية بغرض جمع البيانات أو الاحتيال المالي.</li>
+      </ul>
+
+      <h2 class="hidden-el">5. حدود المسؤولية (إخلاء المسؤولية القانونية)</h2>
+      <div class="highlight-box hidden-el">
+        <i class="fas fa-exclamation-triangle"></i> <strong>تنبيه هام:</strong
+        ><br />
+        منصة "عقارك" هي مجرد وسيط تقني لعرض الإعلانات، وليست طرفاً في أي صفقة
+        عقارية، ولا وسيطاً عقارياً، ولا تتدخل في عمليات البيع والشراء أو تحويل
+        الأموال.
+      </div>
+      <p class="hidden-el">وبناءً عليه، فإن المنصة تخلي مسؤوليتها تماماً عن:</p>
+      <ul class="hidden-el">
+        <li>
+          صحة أو دقة المعلومات الواردة في الإعلانات (يقع عبء التحقق على
+          المشتري/المستأجر).
+        </li>
+        <li>أي أضرار مالية أو قانونية تنشأ عن التعامل بين البائع والمشتري.</li>
+        <li>أي عيوب خفية أو ظاهرة في العقارات المعروضة.</li>
+        <li>
+          ننصح بشدة بمعاينة العقار على أرض الواقع والتحقق من سندات الملكية
+          القانونية قبل دفع أي مبالغ مالية.
+        </li>
+      </ul>
+
+      <h2 class="hidden-el">6. الملكية الفكرية</h2>
+      <p class="hidden-el">
+        جميع حقوق الملكية الفكرية المتعلقة بالمنصة (بما في ذلك التصميم، الأكواد
+        البرمجية، الشعار، وقاعدة البيانات) هي ملك حصري لإدارة "عقارك". يُمنع
+        منعاً باتاً نسخ، أو إعادة إنتاج، أو استغلال أي جزء من الموقع لأغراض
+        تجارية دون إذن كتابي مسبق.
+      </p>
+
+      <h2 class="hidden-el">7. الإنهاء والإيقاف</h2>
+      <p class="hidden-el">
+        يحق لإدارة الموقع، وفقاً لتقديرها المطلق، تجميد أو إنهاء حساب أي مستخدم،
+        أو حذف أي محتوى، في حال انتهاك هذه الشروط، أو تلقي شكاوى متكررة، أو لأي
+        سبب قانوني آخر، ودون أدنى مسؤولية تجاه المستخدم.
+      </p>
+
+      <h2 class="hidden-el">8. القانون الواجب التطبيق والاختصاص القضائي</h2>
+      <p class="hidden-el">
+        تخضع هذه الشروط والأحكام وتفسر وفقاً للقوانين المعمول بها في
+        <strong>جمهورية مصر العربية</strong>. وتختص محاكم القاهرة بالنظر في أي
+        نزاع قد ينشأ عن استخدام هذا الموقع.
+      </p>
+
+      <h2 class="hidden-el">9. التعديلات</h2>
+      <p class="hidden-el">
+        نحتفظ بالحق في تعديل هذه الشروط في أي وقت لتتوافق مع التحديثات القانونية
+        أو التقنية. سيتم نشر النسخة المحدثة في هذه الصفحة، ويعتبر استمرارك في
+        استخدام المنصة قبولاً ضمنياً للشروط الجديدة.
+      </p>
+
+      <h2 class="hidden-el">10. التواصل معنا</h2>
+      <p class="hidden-el">
+        في حال وجود أي استفسار قانوني أو شكوى تتعلق بهذه الشروط، يرجى التواصل
+        معنا عبر القنوات الرسمية في صفحة
+        <a
+          href="contact-us"
+          style="color: var(--neon-primary); text-decoration: underline"
+          >اتصل بنا</a
+        >.
+      </p>
+    </div>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 30px;
+        border-top: 1px solid #333;
+        color: #777;
+        margin-top: 50px;
+      "
+    >
+      <p>جميع الحقوق محفوظة © 2025 - عقارك</p>
+    </footer>
+
+    <script src="terms.js"></script>
+  </body>
+</html>

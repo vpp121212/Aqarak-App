@@ -1,0 +1,749 @@
+let currentPointPrice = 1;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  updateGreeting();
+  await loadUserData();
+  checkNotifications();
+  fetchPaymentConfig();
+  checkPaymentStatus();
+
+  const favBtn = document.getElementById("show-favorites");
+  if (favBtn) {
+    favBtn.addEventListener("click", toggleFavorites);
+  }
+});
+
+async function fetchPaymentConfig() {
+  try {
+    const response = await fetch("/api/config/payment-price");
+    const data = await response.json();
+
+    if (data.pointPrice) {
+      currentPointPrice = parseFloat(data.pointPrice);
+      console.log("✅ تم تحديث سعر النقطة:", currentPointPrice);
+
+      const priceLabel = document.getElementById("current-point-price");
+      if (priceLabel) priceLabel.textContent = currentPointPrice;
+    }
+
+    if (data.isPaymentActive === false) {
+      const btn = document.getElementById("dropdown-balance");
+      if (btn) {
+        btn.onclick = () => alert("نظام الشحن مغلق مؤقتاً للصيانة.");
+        const badge = btn.querySelector(".add-points-badge");
+        if (badge) badge.style.display = "none";
+      }
+    }
+  } catch (error) {
+    console.error("Config Error:", error);
+  }
+}
+
+function updateGreeting() {
+  const hour = new Date().getHours();
+  const greetingText = document.getElementById("time-greeting");
+  const greetingIcon = document.getElementById("greeting-icon");
+  const dateEl = document.getElementById("current-date");
+
+  if (dateEl) {
+    dateEl.textContent = new Date().toLocaleDateString("ar-EG", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+  }
+
+  if (!greetingText || !greetingIcon) return;
+
+  if (hour >= 5 && hour < 12) {
+    greetingText.textContent = "صباح الخير";
+    greetingIcon.className = "fas fa-sun";
+    greetingIcon.style.color = "#ffd700";
+  } else if (hour >= 12 && hour < 17) {
+    greetingText.textContent = "طاب يومك";
+    greetingIcon.className = "fas fa-cloud-sun";
+    greetingIcon.style.color = "#ff9800";
+  } else {
+    greetingText.textContent = "مساء الخير";
+    greetingIcon.className = "fas fa-moon";
+    greetingIcon.style.color = "#00d4ff";
+  }
+}
+
+function checkPaymentStatus() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const paymentStatus = urlParams.get("payment");
+
+  if (paymentStatus) {
+    const newUrl =
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      window.location.pathname;
+    window.history.replaceState({ path: newUrl }, "", newUrl);
+
+    if (paymentStatus === "success") {
+      showStatusModal(true);
+    } else {
+      showStatusModal(false);
+    }
+  }
+}
+
+function showStatusModal(isSuccess) {
+  const modal = document.getElementById("payment-status-modal");
+  const content = modal.querySelector(".status-card");
+  const icon = document.getElementById("status-icon");
+  const title = document.getElementById("status-title");
+  const msg = document.getElementById("status-message");
+  const btn = document.getElementById("status-btn");
+
+  modal.style.display = "block";
+
+  if (isSuccess) {
+    content.classList.remove("status-error");
+    content.classList.add("status-success");
+
+    icon.className = "fas fa-check";
+    title.textContent = "تم الدفع بنجاح! 🎉";
+    msg.textContent =
+      "تمت إضافة النقاط إلى رصيدك فوراً. يمكنك الآن استخدامها لتمييز إعلاناتك أو نشر المزيد.";
+    btn.textContent = "ممتاز، شكراً";
+    btn.style.background = "linear-gradient(135deg, #00ff88, #00b862)";
+    btn.style.color = "black";
+
+    if (typeof loadUserData === "function") loadUserData();
+  } else {
+    content.classList.remove("status-success");
+    content.classList.add("status-error");
+
+    icon.className = "fas fa-times";
+    title.textContent = "فشلت عملية الدفع 😓";
+    msg.textContent =
+      "لم يتم خصم أي مبلغ. يرجى التأكد من بيانات البطاقة أو المحفظة والمحاولة مرة أخرى.";
+    btn.textContent = "محاولة مرة أخرى";
+    btn.style.background = "linear-gradient(135deg, #ff4444, #c62828)";
+    btn.style.color = "white";
+
+    btn.onclick = function () {
+      closeStatusModal();
+      if (typeof openChargeModal === "function") openChargeModal();
+    };
+  }
+}
+
+window.closeStatusModal = function () {
+  document.getElementById("payment-status-modal").style.display = "none";
+};
+
+window.loadUserData = async function () {
+  try {
+    const response = await fetch("/api/auth/me");
+    const data = await response.json();
+
+    if (data.isAuthenticated) {
+      const verifiedBadge = data.is_verified
+        ? `<i class="fas fa-check" style="background:#FFD700; color:white; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:9px; border:1px solid white; margin-right:5px; vertical-align:middle; box-shadow:0 0 5px rgba(255, 215, 0, 0.5);"></i>`
+        : "";
+
+      const usernameEl = document.getElementById("dropdown-username");
+      const welcomeEl = document.getElementById("welcome-title");
+
+      if (usernameEl) usernameEl.innerHTML = `${data.name} ${verifiedBadge}`;
+      if (welcomeEl)
+        welcomeEl.innerHTML = `مرحباً، ${data.name} ${verifiedBadge}`;
+
+      const balanceEl = document.getElementById("dropdown-balance");
+      if (balanceEl) {
+        let plusBadge = balanceEl.querySelector(".add-points-badge");
+        if (!plusBadge) {
+          plusBadge = `<div class="add-points-badge"><i class="fas fa-plus"></i></div>`;
+        } else {
+          plusBadge = plusBadge.outerHTML;
+        }
+
+        if (data.isPaymentActive) {
+          balanceEl.innerHTML = `<span id="balance-num">${data.balance}</span> <i class="fas fa-coins"></i> ${plusBadge}`;
+          balanceEl.style.display = "flex";
+        } else {
+          balanceEl.style.display = "none";
+        }
+      }
+
+      const profileBtn = document.getElementById("dashboard-profile-btn");
+      if (profileBtn) {
+        if (
+          data.profile_picture &&
+          !data.profile_picture.includes("logo.png")
+        ) {
+          profileBtn.innerHTML = `
+                        <img src="${data.profile_picture}" alt="Profile" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                        <span id="menu-notif-badge" class="menu-badge">0</span>
+                    `;
+        } else {
+          profileBtn.innerHTML = `
+                        <i class="fas fa-bars"></i>
+                        <span id="menu-notif-badge" class="menu-badge">0</span>
+                    `;
+        }
+      }
+
+      if (data.role === "admin") {
+        const adminCard = document.getElementById("admin-card");
+        if (adminCard) adminCard.style.display = "block";
+      }
+
+      if (data.username) {
+        const viewProfileBtn = document.getElementById("view-my-profile-btn");
+        if (viewProfileBtn) {
+          viewProfileBtn.href = `profile?u=${data.username}`;
+        }
+      }
+    } else {
+      window.location.href = "authentication";
+    }
+  } catch (e) {
+    console.error("Load User Data Error:", e);
+  }
+};
+
+async function toggleFavorites() {
+  const area = document.getElementById("favorites-area");
+  const container = document.getElementById("favorites-listings");
+  const btnText = document.getElementById("show-favorites");
+
+  if (area.style.display === "block") {
+    area.style.display = "none";
+    if (btnText) btnText.innerHTML = "عرض المفضلة";
+    return;
+  }
+
+  area.style.display = "block";
+  if (btnText) btnText.innerHTML = "إخفاء المفضلة";
+
+  setTimeout(() => {
+    area.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
+
+  container.innerHTML = `
+        <div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--neon-primary);">
+            <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+            <p style="margin-top:10px; color:#aaa;">جاري جلب عقاراتك المميزة...</p>
+        </div>`;
+
+  try {
+    const res = await fetch("/api/favorites");
+
+    if (!res.ok) {
+      throw new Error(`Network response was not ok (Status: ${res.status})`);
+    }
+
+    const properties = await res.json();
+    container.innerHTML = "";
+
+    if (properties.length === 0) {
+      container.innerHTML = `
+                <div style="grid-column: 1/-1; text-align:center; padding:30px; border:1px dashed #444; border-radius:15px; color:#888;">
+                    <i class="far fa-heart" style="font-size:3rem; margin-bottom:15px; opacity:0.5;"></i>
+                    <p>قائمة المفضلة فارغة حالياً.</p>
+                </div>`;
+      return;
+    }
+
+    properties.forEach((prop) => {
+      const price = parseInt(prop.price).toLocaleString("en-US");
+      const location = prop.location || "موقع مميز";
+
+      const html = `
+                <div class="fav-card" id="fav-item-${prop.id}">
+                    <a href="property?id=${prop.id}" class="fav-img-link">
+                        <img src="${
+                          prop.imageUrl || "logo.png"
+                        }" class="fav-img" loading="lazy" alt="${prop.title}">
+                        <div class="price-badge">${price} ج.م</div>
+                    </a>
+                    <div class="fav-content">
+                        <div>
+                            <div class="fav-title" title="${prop.title}">${
+        prop.title
+      }</div>
+                            <div class="fav-location" style="color:#aaa; font-size:0.8rem; margin-bottom:10px;">
+                                <i class="fas fa-map-marker-alt"></i> ${location}
+                            </div>
+                        </div>
+                        <div class="fav-actions">
+                            <a href="property?id=${
+                              prop.id
+                            }" class="btn-fav-view">
+                                <i class="fas fa-eye"></i> التفاصيل
+                            </a>
+                            <button class="btn-fav-remove" onclick="removeFavorite(${
+                              prop.id
+                            })" title="حذف">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+      container.innerHTML += html;
+    });
+  } catch (e) {
+    console.error("Favorites Error:", e);
+    container.innerHTML = `
+            <div style="text-align:center; color:#ff4444; grid-column: 1/-1; padding: 20px;">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                <p style="margin-top:10px;">حدث خطأ في الاتصال بالخادم.</p>
+            </div>`;
+  }
+}
+
+let tempFavIdToDelete = null;
+
+window.removeFavorite = function (id) {
+  tempFavIdToDelete = id;
+  document.getElementById("delete-fav-modal").style.display = "block";
+  document.getElementById("confirm-delete-fav-btn").onclick = executeDeleteFav;
+};
+
+async function executeDeleteFav() {
+  if (!tempFavIdToDelete) return;
+  const id = tempFavIdToDelete;
+  const modal = document.getElementById("delete-fav-modal");
+  const card = document.getElementById(`fav-item-${id}`);
+
+  modal.style.display = "none";
+  if (card) {
+    card.style.transition = "all 0.5s ease";
+    card.style.transform = "scale(0) rotate(10deg)";
+    card.style.opacity = "0";
+  }
+
+  try {
+    const res = await fetch(`/api/favorites/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setTimeout(() => {
+        if (card) card.remove();
+        const container = document.getElementById("favorites-listings");
+        if (container && container.children.length === 0) toggleFavorites();
+      }, 500);
+    } else {
+      if (card) {
+        card.style.transform = "scale(1)";
+        card.style.opacity = "1";
+        alert("فشل الحذف");
+      }
+    }
+  } catch (e) {
+    if (card) {
+      card.style.transform = "scale(1)";
+      card.style.opacity = "1";
+    }
+  }
+}
+
+async function checkNotifications() {
+  try {
+    const res = await fetch("/api/user/notifications");
+    const data = await res.json();
+
+    const badge = document.getElementById("menu-notif-badge");
+    const list = document.getElementById("menu-notif-list");
+    const countText = document.getElementById("notif-count-text");
+
+    if (data.unreadCount > 0) {
+      if (badge) {
+        badge.style.display = "flex";
+        badge.textContent = data.unreadCount > 9 ? "+9" : data.unreadCount;
+      }
+      if (countText) {
+        countText.textContent = `${data.unreadCount} جديدة`;
+      }
+    } else {
+      if (badge) badge.style.display = "none";
+      if (countText) countText.textContent = "";
+    }
+
+    if (list && data.notifications && data.notifications.length > 0) {
+    }
+  } catch (e) {
+    console.error("Notif Error:", e);
+  }
+}
+
+window.toggleProfileMenu = async function () {
+  const menu = document.getElementById("profile-dropdown");
+  const badge = document.getElementById("menu-notif-badge");
+  const countText = document.getElementById("notif-count-text");
+
+  if (!menu) return;
+
+  if (menu.style.display === "block") {
+    menu.style.display = "none";
+  } else {
+    menu.style.display = "block";
+
+    if (badge && badge.style.display !== "none") {
+      badge.style.display = "none";
+      if (countText) countText.textContent = "";
+      try {
+        await fetch("/api/user/notifications/read", { method: "POST" });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+};
+
+window.openLogoutModal = function () {
+  document.getElementById("logout-modal").style.display = "block";
+};
+
+window.performLogout = async function () {
+  const btn = document.querySelector("#logout-modal .modern-action-btn");
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> وداعاً...';
+  try {
+    await fetch("/api/logout", { method: "POST" });
+    setTimeout(() => (window.location.href = "authentication"), 800);
+  } catch (e) {
+    window.location.href = "authentication";
+  }
+};
+
+window.closeCustomModal = function (modalId) {
+  document.getElementById(modalId).style.display = "none";
+  if (modalId === "unblock-modal") {
+    document.getElementById("blocked-users-modal").style.display = "block";
+  }
+};
+
+window.addEventListener("click", function (e) {
+  const container = document.querySelector(".profile-menu-container");
+  const menu = document.getElementById("profile-dropdown");
+  const isDelete = e.target.closest(".notif-delete-btn");
+
+  if (container && menu && !container.contains(e.target) && !isDelete) {
+    menu.style.display = "none";
+  }
+});
+
+window.openChargeModal = function () {
+  const modal = document.getElementById("charge-modal");
+  if (modal) {
+    modal.style.display = "block";
+
+    const priceLabel = document.getElementById("current-point-price");
+    if (priceLabel) priceLabel.textContent = currentPointPrice;
+
+    document.getElementById("charge-points").value = "";
+    document.getElementById("price-display").textContent = "0";
+    selectPaymentMethod("card");
+  }
+};
+
+window.closeChargeModal = function () {
+  document.getElementById("charge-modal").style.display = "none";
+};
+
+let selectedMethod = "card";
+
+window.selectPaymentMethod = function (method) {
+  selectedMethod = method;
+
+  document
+    .querySelectorAll(".modern-method-card")
+    .forEach((el) => el.classList.remove("active"));
+
+  if (method === "card") {
+    document.getElementById("btn-card").classList.add("active");
+    document.getElementById("wallet-input-container").style.display = "none";
+  } else {
+    document.getElementById("btn-wallet").classList.add("active");
+    document.getElementById("wallet-input-container").style.display = "block";
+  }
+};
+
+window.calculatePrice = function () {
+  const points = document.getElementById("charge-points").value;
+  const priceDisplay = document.getElementById("price-display");
+
+  const price = points ? (points * currentPointPrice).toFixed(2) : 0;
+
+  if (priceDisplay) priceDisplay.textContent = price;
+};
+
+window.startChargeProcess = async function () {
+  const points = document.getElementById("charge-points").value;
+  const walletNumber = document.getElementById("wallet-number").value;
+  const btn = document.querySelector(
+    '#charge-modal button[onclick="startChargeProcess()"]'
+  );
+
+  if (!points || points < 1) return alert("أقل عدد للنقاط هو 1");
+  if (
+    selectedMethod === "wallet" &&
+    (!walletNumber || walletNumber.length < 11)
+  ) {
+    return alert("أدخل رقم محفظة صحيح");
+  }
+
+  const originalText = btn.innerHTML;
+  btn.innerHTML =
+    '<i class="fas fa-circle-notch fa-spin"></i> جاري المعالجة...';
+  btn.disabled = true;
+
+  const payload = {
+    points: parseInt(points),
+    method: selectedMethod,
+    mobileNumber: selectedMethod === "wallet" ? walletNumber : null,
+  };
+
+  try {
+    const response = await fetch("/api/payment/charge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      if (data.redirectUrl) window.location.href = data.redirectUrl;
+      else if (data.iframeUrl) window.location.href = data.iframeUrl;
+    } else {
+      alert("خطأ: " + data.message);
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  } catch (e) {
+    console.error(e);
+    alert("فشل الاتصال بالسيرفر");
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+};
+
+const passModalBtn = document.getElementById("open-password-modal");
+if (passModalBtn) {
+  passModalBtn.addEventListener("click", () => {
+    document.getElementById("passwordModal").style.display = "block";
+    document.getElementById("normal-change-mode").style.display = "block";
+    document.getElementById("otp-change-mode").style.display = "none";
+  });
+}
+
+window.closeModal = function () {
+  document.getElementById("passwordModal").style.display = "none";
+};
+
+window.switchPassMode = function (mode) {
+  if (mode === "otp") {
+    document.getElementById("normal-change-mode").style.display = "none";
+    document.getElementById("otp-change-mode").style.display = "block";
+    document.getElementById("step-send-otp").style.display = "block";
+    document.getElementById("step-verify-otp").style.display = "none";
+  } else {
+    document.getElementById("otp-change-mode").style.display = "none";
+    document.getElementById("normal-change-mode").style.display = "block";
+  }
+};
+
+window.changePasswordNormal = async function () {
+  const currentPass = document.getElementById("current-pass").value;
+  const newPass = document.getElementById("new-pass-1").value;
+  const msg = document.getElementById("pass-msg");
+
+  if (!currentPass || !newPass) {
+    msg.textContent = "املأ جميع الحقول";
+    msg.style.color = "red";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/user/change-password-manual", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPass, newPass }),
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      alert("✅ تم تغيير كلمة المرور بنجاح");
+      closeModal();
+    } else {
+      msg.textContent = data.message;
+      msg.style.color = "red";
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+window.sendResetOTP = async function () {
+  const phone = document.getElementById("reset-phone").value;
+  const msg = document.getElementById("otp-msg");
+
+  if (!phone) return alert("أدخل رقم الهاتف");
+
+  try {
+    const res = await fetch("/api/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, type: "reset" }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      msg.textContent = "تم إرسال الكود للواتساب!";
+      msg.style.color = "#00ff88";
+      document.getElementById("step-send-otp").style.display = "none";
+      document.getElementById("step-verify-otp").style.display = "block";
+    } else {
+      msg.textContent = data.message;
+      msg.style.color = "red";
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+window.resetPasswordViaOTP = async function () {
+  const phone = document.getElementById("reset-phone").value;
+  const otp = document.getElementById("otp-code").value;
+  const newPass = document.getElementById("new-pass-2").value;
+
+  if (!otp || !newPass) return alert("أكمل البيانات");
+
+  try {
+    const res = await fetch("/api/auth/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, otp, newPassword: newPass }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      alert("✅ تم تغيير كلمة المرور بنجاح!");
+      closeModal();
+    } else {
+      alert("❌ " + data.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+document.addEventListener("DOMContentLoaded", () => {
+  checkBlockedUsers();
+});
+
+let blockedUsersList = [];
+
+async function checkBlockedUsers() {
+  try {
+    const res = await fetch("/api/user/my-reports");
+    if (res.ok) {
+      blockedUsersList = await res.json();
+      const card = document.getElementById("blocked-users-card");
+      const badge = document.getElementById("blocked-count-badge");
+
+      if (blockedUsersList.length > 0 && card) {
+        card.style.display = "block";
+        card.style.animation = "slideDown 0.5s ease-out";
+        if (badge) badge.textContent = blockedUsersList.length;
+      } else if (card) {
+        card.style.display = "none";
+      }
+    }
+  } catch (e) {
+    console.error("Error checking blocked users:", e);
+  }
+}
+
+function openBlockedUsersModal() {
+  const modal = document.getElementById("blocked-users-modal");
+  const container = document.getElementById("blocked-list-container");
+  modal.style.display = "block";
+
+  if (blockedUsersList.length === 0) {
+    container.innerHTML =
+      '<p style="text-align:center; color:#777; padding:20px;">القائمة فارغة</p>';
+    return;
+  }
+
+  let html = "";
+  blockedUsersList.forEach((user) => {
+    html += `
+            <div class="blocked-row" id="row-${user.reported_phone}">
+                <div class="blocked-info">
+                    <h4>${user.name || "مستخدم عقارك"}</h4>
+                    <p><i class="fas fa-phone-alt"></i> ${
+                      user.reported_phone
+                    }</p>
+                    <p style="color:#ff4444; font-size:0.7rem;">${
+                      user.reason || "بدون سبب"
+                    }</p>
+                </div>
+                <button onclick="unblockUser('${
+                  user.reported_phone
+                }')" class="btn-mini-unblock">
+                    فك الحظر
+                </button>
+            </div>
+        `;
+  });
+  container.innerHTML = html;
+}
+
+function closeBlockedModal() {
+  document.getElementById("blocked-users-modal").style.display = "none";
+}
+
+let tempPhoneToUnblock = null;
+
+window.unblockUser = function (phone) {
+  tempPhoneToUnblock = phone;
+  document.getElementById("blocked-users-modal").style.display = "none";
+  document.getElementById("unblock-modal").style.display = "block";
+  document.getElementById("confirm-unblock-btn").onclick = executeUnblock;
+};
+
+async function executeUnblock() {
+  if (!tempPhoneToUnblock) return;
+  const phone = tempPhoneToUnblock;
+  document.getElementById("unblock-modal").style.display = "none";
+  document.getElementById("blocked-users-modal").style.display = "block";
+
+  try {
+    const res = await fetch("/api/user/remove-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reportedPhone: phone }),
+    });
+
+    if (res.ok) {
+      const row = document.getElementById(`row-${phone}`);
+      if (row) {
+        row.style.background = "#00ff8822";
+        row.style.transition = "0.5s";
+        setTimeout(() => {
+          row.style.transform = "translateX(100%)";
+          row.style.opacity = "0";
+          setTimeout(() => row.remove(), 300);
+        }, 300);
+      }
+      blockedUsersList = blockedUsersList.filter(
+        (u) => u.reported_phone !== phone
+      );
+      const badge = document.getElementById("blocked-cou nt-badge");
+      if (badge) badge.textContent = blockedUsersList.length;
+
+      if (blockedUsersList.length === 0) {
+        setTimeout(() => {
+          closeBlockedModal();
+          document.getElementById("blocked-users-card").style.display = "none";
+        }, 800);
+      }
+    }
+  } catch (e) {
+    alert("خطأ في الاتصال");
+  }
+}

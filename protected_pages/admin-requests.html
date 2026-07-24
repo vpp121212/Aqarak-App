@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <script src="admin-auth.js"></script>
+    <title>عقارك - طلبات العقارات المخصصة</title>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="apple-touch-icon" href="logo.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+
+        "@type": "RealEstateAgent",
+
+        "name": "منصة عقارك - Aqarak",
+
+        "alternateName": ["Aqarak EG", "شركة عقارك", "Aqarak Real Estate"],
+
+        "url": "https://aqarakeg.com",
+
+        "logo": "https://aqarakeg.com/logo.jpg",
+
+        "image": "https://aqarakeg.com/logo.jpg",
+
+        "description": "منصة عقارك هي الوجهة الأولى لبيع وشراء وإيجار العقارات في مصر بأقل عمولة. نحن شركة متخصصة في توفير حلول عقارية ذكية وسريعة.",
+
+        "address": {
+          "@type": "PostalAddress",
+
+          "addressLocality": "Cairo",
+
+          "addressCountry": "EG"
+        },
+
+        "priceRange": "$",
+
+        "contactPoint": {
+          "@type": "ContactPoint",
+
+          "telephone": "+201008102237",
+
+          "contactType": "customer service",
+
+          "areaServed": "EG",
+
+          "availableLanguage": ["Arabic"]
+        },
+
+        "sameAs": [
+          "https://www.facebook.com/share/1ADgNDLXc6/",
+
+          "https://www.instagram.com/aqarak.eg?igsh=eDN2d2tuNmxhazY5",
+
+          "https://whatsapp.com/channel/0029Vb6YH08CxoAoe7aaSP38"
+        ]
+      }
+    </script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      :root {
+        --glass-bg: rgba(20, 20, 20, 0.98);
+        --neon-primary: #00ff88;
+        --neon-secondary: #00d4ff;
+        --neon-danger: #ff4444;
+        --neon-gold: #ffd700;
+        --card-bg: #1a1a1a;
+      }
+
+      body.internal-page {
+        background-color: #0f0f0f;
+        background-image: radial-gradient(
+          circle at 50% 0%,
+          #1a2c25 0%,
+          #0f0f0f 70%
+        );
+        min-height: 100vh;
+        font-family: "Cairo", sans-serif;
+        color: white;
+        overflow-x: hidden;
+        padding-top: 100px !important;
+      }
+
+      .main-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 9999;
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 15px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1250px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .logo {
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--neon-secondary);
+      }
+      .logo-text {
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+
+      .nav-button {
+        text-decoration: none;
+        color: white;
+        border: 1px solid var(--neon-secondary);
+        padding: 6px 20px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .nav-button:hover {
+        background: var(--neon-secondary);
+        color: black;
+      }
+
+      .main-content {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px 15px;
+      }
+
+      .page-title {
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 2rem;
+        color: var(--neon-secondary);
+        text-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+      }
+
+      .requests-container {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+      }
+
+      .request-card {
+        background: var(--card-bg);
+        border: 1px solid #333;
+        border-radius: 16px;
+        padding: 25px;
+        position: relative;
+        overflow: hidden;
+        transition: 0.3s;
+      }
+
+      .request-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--neon-secondary);
+      }
+
+      .request-card:hover {
+        border-color: var(--neon-secondary);
+        box-shadow: 0 5px 20px rgba(0, 212, 255, 0.1);
+      }
+
+      .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid #333;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+      }
+      .request-title {
+        color: white;
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin: 0;
+      }
+      .request-date {
+        color: #aaa;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .info-item {
+        color: #ccc;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 10px;
+        border-radius: 8px;
+      }
+      .info-item strong {
+        color: var(--neon-secondary);
+        margin-left: 5px;
+      }
+
+      .specs-label {
+        color: var(--neon-primary);
+        margin-bottom: 10px;
+        font-weight: bold;
+        display: block;
+      }
+      .specs-box {
+        background: rgba(0, 212, 255, 0.05);
+        border: 1px dashed var(--neon-secondary);
+        padding: 15px;
+        border-radius: 10px;
+        color: #eee;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        white-space: pre-wrap;
+      }
+
+      .admin-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 15px;
+      }
+
+      .action-btn {
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+        background: transparent;
+        font-size: 0.9rem;
+      }
+
+      .btn-delete {
+        border: 1px solid var(--neon-danger);
+        color: var(--neon-danger);
+      }
+      .btn-delete:hover {
+        background: var(--neon-danger);
+        color: white;
+      }
+
+      .empty-message {
+        text-align: center;
+        padding: 40px;
+        color: #888;
+        border: 2px dashed #333;
+        border-radius: 15px;
+      }
+
+      @media (max-width: 768px) {
+        body.internal-page {
+          padding-top: 130px !important;
+        }
+        .request-header {
+          flex-direction: column;
+          gap: 5px;
+        }
+        .logo-text {
+          display: none;
+        }
+        .admin-actions {
+          justify-content: stretch;
+        }
+        .action-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body class="internal-page">
+    <header class="main-header">
+      <div class="header-container">
+        <div class="logo-container">
+          <img src="logo.jpg" alt="شعار عقارك" class="logo" />
+          <span class="logo-text">طلبات العقارات (Admin)</span>
+        </div>
+        <nav class="main-nav">
+          <a href="admin-home" class="nav-button">
+            العودة للرئيسية
+            <i class="fas fa-arrow-left" style="margin-right: 5px"></i>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <h1 class="page-title">طلبات البحث عن عقار</h1>
+
+      <div class="requests-container" id="requests-container">
+        <p class="empty-message" style="color: var(--neon-secondary)">
+          جاري تحميل الطلبات <i class="fas fa-spinner fa-spin"></i>
+        </p>
+      </div>
+    </main>
+
+    <script src="admin-requests.js"></script>
+    <script src="logout.js"></script>
+    <script src="app.js"></script>
+    <script src="reload.js"></script>
+    <script src="global-alert.js"></script>
+  </body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الأسئلة الشائعة - عقارك</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+    <style>
+      :root {
+        --glass-bg: rgba(20, 20, 20, 0.95);
+        --neon-primary: #00ff88;
+        --neon-secondary: #00d4ff;
+        --neon-error: #ff4444;
+        --text-gray: #aaa;
+        --card-bg: #1e1e1e;
+        --border-color: #333;
+      }
+
+      body {
+        background-color: #0f0f0f;
+        background-image: radial-gradient(
+          circle at 50% 0%,
+          #1a2c25 0%,
+          #0f0f0f 70%
+        );
+        min-height: 100vh;
+        font-family: "Cairo", sans-serif;
+        color: white;
+        margin: 0;
+        padding-top: 80px;
+        overflow-x: hidden;
+      }
+
+      .main-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 0;
+        transition: transform 0.4s ease-in-out;
+      }
+      .header-hidden {
+        transform: translateY(-100%);
+      }
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .nav-link {
+        color: white;
+        text-decoration: none;
+        padding: 8px 20px;
+        border: 1px solid var(--neon-secondary);
+        border-radius: 50px;
+        transition: 0.3s;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-link:hover {
+        background: var(--neon-secondary);
+        color: black;
+      }
+
+      .faq-hero {
+        text-align: center;
+        padding: 60px 20px;
+        opacity: 0;
+        animation: fadeInUp 1s forwards;
+      }
+      .faq-title {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #fff 30%, var(--neon-primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .faq-subtitle {
+        color: var(--text-gray);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .faq-container {
+        max-width: 800px;
+        margin: 0 auto 80px;
+        padding: 0 20px;
+      }
+      .faq-item {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+      .faq-item:hover {
+        border-color: var(--neon-primary);
+        transform: translateY(-3px);
+      }
+      .faq-item.active {
+        background-color: #252525;
+        border-color: var(--neon-secondary);
+      }
+      .faq-question {
+        padding: 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: white;
+      }
+      .faq-item.active .faq-question {
+        color: var(--neon-secondary);
+      }
+      .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        padding: 0 20px;
+        color: #ddd;
+        font-size: 0.95rem;
+        line-height: 1.8;
+        opacity: 0;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .faq-item.active .faq-answer {
+        padding-bottom: 20px;
+        padding-top: 10px;
+        opacity: 1;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .faq-item i {
+        transition: transform 0.4s;
+        font-size: 1.1rem;
+        color: var(--neon-secondary);
+      }
+      .faq-item.active i {
+        transform: rotate(180deg);
+        color: var(--neon-primary);
+      }
+
+      .ask-section {
+        padding: 60px 20px;
+        text-align: center;
+      }
+      .ask-box {
+        max-width: 550px;
+        margin: 0 auto;
+        background: #1a1a1a;
+        padding: 40px;
+        border-radius: 25px;
+        border: 1px solid #333;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s;
+      }
+      .ask-box:hover {
+        border-color: var(--neon-secondary);
+      }
+      .ask-input {
+        width: 100%;
+        padding: 15px 15px 15px 15px;
+        background: #111;
+        border: 1px solid #444;
+        border-radius: 12px;
+        color: white;
+        font-family: "Cairo";
+        font-size: 1rem;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        transition: 0.3s;
+      }
+      .ask-input:focus {
+        outline: none;
+        border-color: var(--neon-primary);
+      }
+      .ask-btn {
+        background: linear-gradient(45deg, var(--neon-primary), #00b862);
+        color: black;
+        font-weight: bold;
+        padding: 15px 30px;
+        width: 100%;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        transition: 0.3s;
+      }
+      .ask-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        z-index: 10000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.show {
+        display: flex;
+        opacity: 1;
+      }
+
+      .modal-box {
+        background: #1a1a1a;
+        padding: 40px;
+        border-radius: 25px;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        position: relative;
+        transform: scale(0.8);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid #333;
+      }
+      .modal-overlay.show .modal-box {
+        transform: scale(1);
+      }
+
+      .modal-success {
+        border-color: var(--neon-primary);
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+      }
+      .modal-success .modal-icon {
+        color: var(--neon-primary);
+      }
+      .modal-success .modal-btn {
+        background: var(--neon-primary);
+        color: black;
+      }
+
+      .modal-error {
+        border-color: var(--neon-error);
+        box-shadow: 0 0 30px rgba(255, 68, 68, 0.1);
+      }
+      .modal-error .modal-icon {
+        color: var(--neon-error);
+      }
+      .modal-error .modal-btn {
+        background: var(--neon-error);
+        color: white;
+      }
+
+      .modal-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+      }
+      .modal-title {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: white;
+      }
+      .modal-msg {
+        color: #aaa;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+      .modal-btn {
+        border: none;
+        padding: 12px 40px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        font-family: "Cairo";
+      }
+      .modal-btn:hover {
+        transform: scale(1.05);
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .faq-title {
+          font-size: 2rem;
+        }
+        .ask-box {
+          padding: 25px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="main-header" id="site-header">
+      <div class="header-content">
+        <a
+          href="home"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+          "
+        >
+          <img
+            src="logo.png"
+            alt="Logo"
+            style="
+              width: 40px;
+              border-radius: 50%;
+              border: 2px solid var(--neon-primary);
+            "
+          />
+          <span style="color: white; font-weight: bold; font-size: 1.2rem"
+            >عقارك</span
+          >
+        </a>
+        <a href="home" class="nav-link">الرئيسية <i class="fas fa-home"></i></a>
+      </div>
+    </header>
+
+    <section class="faq-hero">
+      <h1 class="faq-title">الأسئلة الشائعة</h1>
+      <p class="faq-subtitle">
+        جمعنا لك كل الإجابات اللي ممكن تحتاجها عشان تستخدم المنصة باحترافية
+        وسهولة.
+      </p>
+    </section>
+
+    <div class="faq-container" id="faq-list">
+      <p style="text-align: center; color: #777; padding: 20px">
+        <i class="fas fa-spinner fa-spin"></i> جاري تحميل الأسئلة...
+      </p>
+    </div>
+
+    <section class="ask-section">
+      <div class="ask-box">
+        <h3
+          class="ask-title"
+          style="color: white; font-size: 1.5rem; margin-bottom: 10px"
+        >
+          ملقتش إجابة لسؤالك؟
+        </h3>
+        <p class="ask-desc" style="color: #aaa; margin-bottom: 20px">
+          اكتب سؤالك وهيرد عليك فريق الدعم في أسرع وقت.
+        </p>
+
+        <input
+          type="text"
+          id="ask-name"
+          class="ask-input"
+          placeholder="اسمك (اختياري)"
+        />
+        <textarea
+          id="ask-text"
+          class="ask-input"
+          rows="4"
+          placeholder="اكتب استفسارك بالتفصيل هنا..."
+          style="resize: vertical"
+        ></textarea>
+
+        <button class="ask-btn" onclick="submitQuestion()">
+          <span>إرسال السؤال</span> <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </section>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 30px;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      "
+    >
+      <p>جميع الحقوق محفوظة © 2025 - عقارك</p>
+    </footer>
+
+    <div id="modal-success" class="modal-overlay">
+      <div class="modal-box modal-success">
+        <i class="fas fa-check-circle modal-icon"></i>
+        <h3 class="modal-title">تم الإرسال بنجاح!</h3>
+        <p class="modal-msg">
+          استلمنا سؤالك يا بطل، وهنراجعه ونرد عليك في أقرب وقت ممكن. شكراً
+          لاهتمامك!
+        </p>
+        <button class="modal-btn" onclick="closeModal('modal-success')">
+          تمام، شكراً
+        </button>
+      </div>
+    </div>
+
+    <div id="modal-error" class="modal-overlay">
+      <div class="modal-box modal-error">
+        <i class="fas fa-exclamation-triangle modal-icon"></i>
+        <h3 class="modal-title">حصلت مشكلة!</h3>
+        <p class="modal-msg">
+          للأسف مقدرناش نبعت السؤال دلوقتي بسبب مشكلة في الاتصال. حاول تاني كمان
+          شوية.
+        </p>
+        <button class="modal-btn" onclick="closeModal('modal-error')">
+          حاول مرة تانية
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let lastScrollTop = 0;
+      const header = document.getElementById("site-header");
+      window.addEventListener("scroll", function () {
+        let scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+          header.classList.add("header-hidden");
+        } else {
+          header.classList.remove("header-hidden");
+        }
+        lastScrollTop = scrollTop;
+      });
+
+      async function loadFAQs() {
+        try {
+          const res = await fetch("/api/public/faqs");
+          const faqs = await res.json();
+          const container = document.getElementById("faq-list");
+
+          if (faqs.length === 0) {
+            container.innerHTML =
+              '<div class="faq-item" style="text-align:center; padding:20px; color:#aaa;">لا توجد أسئلة منشورة حالياً.</div>';
+            return;
+          }
+
+          container.innerHTML = faqs
+            .map(
+              (faq, index) => `
+              <div class="faq-item" style="animation: fadeInUp 0.5s ease forwards ${
+                index * 0.1
+              }s; opacity:0;" onclick="toggleFaq(this)">
+                  <div class="faq-question">
+                      ${faq.question}
+                      <i class="fas fa-chevron-down"></i>
+                  </div>
+                  <div class="faq-answer">${faq.answer}</div>
+              </div>
+          `
+            )
+            .join("");
+        } catch (e) {
+          document.getElementById("faq-list").innerHTML =
+            '<p style="text-align:center; color:#ff4444;">فشل تحميل الأسئلة</p>';
+        }
+      }
+
+      function toggleFaq(element) {
+        element.classList.toggle("active");
+        const ans = element.querySelector(".faq-answer");
+        if (element.classList.contains("active")) {
+          ans.style.maxHeight = ans.scrollHeight + "px";
+        } else {
+          ans.style.maxHeight = null;
+        }
+      }
+
+      function showModal(id) {
+        const modal = document.getElementById(id);
+        modal.style.display = "flex";
+        setTimeout(() => {
+          modal.classList.add("show");
+        }, 10);
+      }
+
+      function closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.remove("show");
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, 300);
+      }
+
+      window.onclick = function (event) {
+        if (event.target.classList.contains("modal-overlay")) {
+          event.target.classList.remove("show");
+          setTimeout(() => {
+            event.target.style.display = "none";
+          }, 300);
+        }
+      };
+
+      async function submitQuestion() {
+        const question = document.getElementById("ask-text").value;
+        const name = document.getElementById("ask-name").value;
+        const btn = document.querySelector(".ask-btn");
+        const btnText = btn.querySelector("span");
+        const btnIcon = btn.querySelector("i");
+
+        if (!question.trim()) return alert("من فضلك اكتب سؤالك الأول");
+
+        const originalText = btnText.innerText;
+        btnText.innerText = "جاري الإرسال...";
+        btnIcon.className = "fas fa-spinner fa-spin";
+        btn.disabled = true;
+
+        try {
+          const res = await fetch("/api/public/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question, name }),
+          });
+
+          if (res.ok) {
+            showModal("modal-success");
+            document.getElementById("ask-text").value = "";
+          } else {
+            showModal("modal-error");
+          }
+        } catch (e) {
+          showModal("modal-error");
+        }
+
+        btnText.innerText = originalText;
+        btnIcon.className = "fas fa-paper-plane";
+        btn.disabled = false;
+      }
+
+      document.addEventListener("DOMContentLoaded", loadFAQs);
+    </script>
+  </body>
+</html>

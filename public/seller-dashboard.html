@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>عقارك - اعرض عقارك</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="icon" type="image/png" href="logo.png" />
+
+    <style>
+      :root {
+        --glass-bg: rgba(20, 20, 20, 0.95);
+        --neon-primary: #00ff88;
+        --neon-secondary: #00d4ff;
+        --card-bg: #1a1a1a;
+        --input-bg: #111;
+      }
+
+      body.internal-page {
+        background-color: #0f0f0f;
+        background-image: radial-gradient(
+          circle at 50% 0%,
+          #1a2c25 0%,
+          #0f0f0f 70%
+        );
+        min-height: 100vh;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: "Cairo", sans-serif;
+        color: white;
+        overflow-x: hidden;
+      }
+
+      .smart-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 2000;
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 12px 0;
+        transition: transform 0.3s ease-in-out;
+      }
+      .smart-header.scroll-down {
+        transform: translateY(-100%);
+      }
+
+      .header-content {
+        max-width: 1250px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .nav-home-btn {
+        color: white;
+        text-decoration: none;
+        border: 1px solid var(--neon-primary);
+        padding: 8px 20px;
+        border-radius: 50px;
+        transition: 0.3s;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .nav-home-btn:hover {
+        background: var(--neon-primary);
+        color: black;
+      }
+
+      .main-content {
+      }
+
+      .seller-form-container {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 30px;
+        border: 1px solid #333;
+        max-width: 850px;
+        margin: 100px auto 30px auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .seller-form-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--neon-primary),
+          var(--neon-secondary)
+        );
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+      .input-group label {
+        display: block;
+        color: #ccc;
+        margin-bottom: 8px;
+        font-weight: bold;
+        font-size: 0.95rem;
+      }
+
+      .neon-input-white {
+        width: 100%;
+        padding: 12px 15px;
+        background: var(--input-bg);
+        border: 1px solid #444;
+        color: white;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-family: "Cairo";
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+      .neon-input-white:focus {
+        border-color: var(--neon-primary);
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
+        outline: none;
+      }
+
+      select.neon-input-white {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ff88' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: left 10px center;
+        background-size: 16px;
+      }
+
+      .map-wrapper {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--neon-secondary);
+        height: 400px;
+        margin-top: 15px;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.1);
+      }
+      #map {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+        filter: grayscale(20%) invert(90%);
+      }
+
+      .map-search-bar {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        width: 90%;
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        background: rgba(20, 20, 20, 0.95);
+        border-radius: 50px;
+        padding: 5px;
+        border: 1px solid var(--neon-primary);
+      }
+      .map-search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 0 10px;
+        outline: none;
+        font-family: "Cairo";
+      }
+      .map-search-btn {
+        background: var(--neon-primary);
+        color: black;
+        border: none;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-upload-trigger {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 25px;
+        border: 2px dashed #444;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        color: #888;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .btn-upload-trigger:hover {
+        border-color: var(--neon-primary);
+        color: var(--neon-primary);
+      }
+
+      .image-preview-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .preview-item {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #444;
+        position: relative;
+      }
+      .preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .btn-neon-large-green {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(45deg, #00ff88, #00cc6a);
+        color: black;
+        font-weight: bold;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 25px;
+        box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+      }
+      .btn-neon-large-green:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 255, 136, 0.4);
+      }
+
+      .ai-insight-box {
+        background: rgba(0, 212, 255, 0.03);
+        border: 1px solid var(--neon-secondary);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+      }
+      .ai-icon {
+        font-size: 2rem;
+        color: var(--neon-secondary);
+      }
+
+      .english-num-tip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 212, 255, 0.1);
+        border: 1px solid var(--neon-secondary);
+        color: var(--neon-secondary);
+        padding: 6px 15px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+      }
+
+      .main-footer {
+        background: var(--card-bg);
+        border-top: 1px solid #333;
+        padding: 30px 20px;
+        text-align: center;
+        margin-top: 50px;
+        color: #777;
+      }
+      .social-links a {
+        color: #aaa;
+        margin: 0 10px;
+        font-size: 1.2rem;
+      }
+
+      @media (max-width: 768px) {
+        .smart-header {
+          padding: 10px 0;
+        }
+
+        .seller-form-container {
+          margin-top: 90px;
+          padding: 20px 15px;
+          margin-left: 10px;
+          margin-right: 10px;
+        }
+
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .map-wrapper {
+          height: 300px;
+        }
+      }
+      .map-wrapper {
+        position: relative;
+        border-radius: 16px;
+        overflow: visible;
+        border: 2px solid #333;
+        height: 400px;
+        margin-top: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+      #map {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+        border-radius: 14px;
+        filter: grayscale(20%) invert(90%);
+      }
+
+      .map-search-container {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        width: 90%;
+        max-width: 450px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .map-search-bar {
+        display: flex;
+        align-items: center;
+        background: rgba(20, 20, 20, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        padding: 5px 5px 5px 20px;
+        border: 1px solid var(--neon-primary);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        transition: 0.3s;
+      }
+
+      .map-search-bar:focus-within {
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        border-color: #fff;
+      }
+
+      .map-search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 10px;
+        outline: none;
+        font-family: "Cairo";
+        font-size: 1rem;
+      }
+
+      .map-search-btn {
+        background: var(--neon-primary);
+        color: black;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+      }
+      .map-search-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .search-suggestions {
+        display: none;
+        margin-top: 8px;
+        background: rgba(30, 30, 30, 0.98);
+        width: 95%;
+        border-radius: 12px;
+        border: 1px solid #444;
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+      }
+
+      .suggestion-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid #444;
+        cursor: pointer;
+        color: #ddd;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        transition: 0.2s;
+      }
+      .suggestion-item:last-child {
+        border-bottom: none;
+      }
+      .suggestion-item:hover {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-primary);
+      }
+      .suggestion-item i {
+        color: var(--neon-primary);
+      }
+
+      .locate-me-fab {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: white;
+        color: black;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: 0.3s;
+      }
+      .locate-me-fab:hover {
+        background: var(--neon-primary);
+        transform: translateY(-3px);
+      }
+
+      .map-wrapper {
+        position: relative;
+        border-radius: 16px;
+        overflow: visible;
+        border: 2px solid #333;
+        height: 400px;
+        margin-top: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      #map {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+        border-radius: 14px;
+        filter: grayscale(20%) invert(90%);
+      }
+
+      .map-search-container {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        width: 90%;
+        max-width: 450px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .map-search-bar {
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+        background: rgba(20, 20, 20, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 50px;
+        padding: 5px;
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+        width: 100%;
+        transition: all 0.3s ease;
+      }
+
+      .map-search-bar:focus-within {
+        border-color: var(--neon-primary);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        background: rgba(10, 10, 10, 0.98);
+      }
+
+      .map-search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        outline: none;
+        font-family: "Cairo";
+        font-size: 1rem;
+        text-align: right;
+        direction: rtl;
+      }
+
+      .map-search-btn {
+        background: var(--neon-primary);
+        color: black;
+        border: none;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        margin-right: 5px;
+        transition: transform 0.2s;
+      }
+      .map-search-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .search-suggestions {
+        display: none;
+        margin-top: 12px;
+        background: rgba(25, 25, 25, 0.98);
+        width: 98%;
+        border-radius: 16px;
+        border: 1px solid #444;
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+        z-index: 1001;
+      }
+
+      .suggestion-item {
+        padding: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        color: #eee;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.95rem;
+        transition: 0.2s;
+        text-align: right;
+        direction: rtl;
+      }
+
+      .suggestion-item:last-child {
+        border-bottom: none;
+      }
+
+      .suggestion-item:hover {
+        background: linear-gradient(90deg, rgba(0, 255, 136, 0.1), transparent);
+        padding-right: 20px;
+        color: var(--neon-primary);
+      }
+      .suggestion-item i {
+        color: var(--neon-primary);
+      }
+
+      .locate-fab-btn {
+        position: absolute;
+        bottom: 25px;
+        right: 25px;
+        z-index: 1000;
+        background: rgba(20, 20, 20, 0.85);
+        backdrop-filter: blur(4px);
+        color: var(--neon-primary);
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        border: 2px solid var(--neon-primary);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.15);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .locate-fab-btn:hover {
+        background: var(--neon-primary);
+        color: black;
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+        transform: scale(1.15) rotate(15deg);
+      }
+
+      .locate-fab-btn:active {
+        transform: scale(0.9);
+      }
+      @media (max-width: 768px) {
+        .map-wrapper {
+          height: 300px;
+        }
+
+        .map-search-container {
+          width: 95%;
+          top: 15px;
+        }
+
+        .map-search-input {
+          font-size: 0.9rem;
+        }
+
+        .locate-fab-btn {
+          width: 50px;
+          height: 50px;
+          bottom: 15px;
+          right: 15px;
+        }
+      }
+      .ai-insight-box {
+        background: linear-gradient(
+          90deg,
+          rgba(0, 255, 136, 0.05) 0%,
+          transparent 100%
+        );
+        border-right: 3px solid var(--neon-primary);
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      .ai-insight-box:hover {
+        transform: translateX(-5px);
+        background: linear-gradient(
+          90deg,
+          rgba(0, 255, 136, 0.08) 0%,
+          transparent 100%
+        );
+      }
+
+      .ai-insight-icon {
+        color: var(--neon-primary);
+        font-size: 1.4rem;
+        animation: pulse-glow 2s infinite;
+      }
+
+      @keyframes pulse-glow {
+        0% {
+          text-shadow: 0 0 5px rgba(0, 255, 136, 0.2);
+          opacity: 0.8;
+        }
+        50% {
+          text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+          opacity: 1;
+        }
+        100% {
+          text-shadow: 0 0 5px rgba(0, 255, 136, 0.2);
+          opacity: 0.8;
+        }
+      }
+
+      .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+      }
+      .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: linear-gradient(
+          45deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.1) 50%,
+          transparent 70%
+        );
+        background-size: 200% 100%;
+        animation: loading-bar 1.5s infinite linear;
+        border-radius: 50px;
+      }
+      @keyframes loading-bar {
+        0% {
+          background-position: 100% 0;
+        }
+        100% {
+          background-position: -100% 0;
+        }
+      }
+
+      .map-wrapper.map-disabled {
+        position: relative;
+        filter: grayscale(100%) contrast(0.8);
+        opacity: 0.7;
+        transition: all 0.4s ease;
+      }
+
+      .map-lock-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2000;
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .map-wrapper.map-disabled .map-lock-overlay {
+        display: flex;
+      }
+
+      .lock-icon-hint {
+        font-size: 3rem;
+        color: #fff;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 50%;
+      }
+
+      .map-lock-overlay:hover .lock-icon-hint {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .perm-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 99999;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .perm-modal-overlay.show {
+        display: flex;
+        opacity: 1;
+      }
+
+      .perm-modal-content {
+        background: linear-gradient(145deg, #151515, #1e1e1e);
+        border: 1px solid var(--neon-primary);
+        width: 90%;
+        max-width: 420px;
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.15);
+        transform: translateY(20px) scale(0.9);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .perm-modal-overlay.show .perm-modal-content {
+        transform: translateY(0) scale(1);
+      }
+
+      .perm-modal-content::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(0, 255, 136, 0.05) 0%,
+          transparent 60%
+        );
+        animation: rotateGlow 10s linear infinite;
+        pointer-events: none;
+      }
+
+      @keyframes rotateGlow {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .perm-icon-box {
+        width: 80px;
+        height: 80px;
+        background: rgba(0, 255, 136, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px auto;
+        border: 2px solid var(--neon-primary);
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+      }
+
+      .perm-icon-box i {
+        font-size: 2.5rem;
+        color: var(--neon-primary);
+        animation: floatIcon 3s ease-in-out infinite;
+      }
+
+      @keyframes floatIcon {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      .perm-title {
+        color: white;
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+        font-family: "Cairo", sans-serif;
+      }
+
+      .perm-desc {
+        color: #aaa;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+      }
+
+      .btn-perm-allow {
+        background: var(--neon-primary);
+        color: #000;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+      }
+
+      .btn-perm-allow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+      }
+
+      .btn-perm-cancel {
+        background: transparent;
+        color: #777;
+        border: none;
+        margin-top: 15px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: 0.3s;
+      }
+
+      .btn-perm-cancel:hover {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body class="internal-page">
+    <header class="smart-header" id="main-header">
+      <div class="header-content">
+        <a
+          href="home"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+          "
+        >
+          <img
+            src="logo.jpg"
+            alt="Logo"
+            style="
+              width: 40px;
+              border-radius: 50%;
+              border: 2px solid var(--neon-primary);
+            "
+          />
+          <span style="color: white; font-weight: bold; font-size: 1.2rem"
+            >عقارك</span
+          >
+        </a>
+        <a href="home" class="nav-home-btn"
+          ><i class="fas fa-home"></i> الرئيسية</a
+        >
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="seller-form-container">
+        <h2
+          style="
+            color: var(--neon-primary);
+            margin-bottom: 10px;
+            border-right: 4px solid var(--neon-primary);
+            padding-right: 15px;
+          "
+        >
+          اعرض عقارك
+        </h2>
+        <p style="color: #aaa; margin-bottom: 30px; font-size: 0.95rem">
+          املأ البيانات وسنقوم بتحديد خدمات المنطقة.
+        </p>
+
+        <form id="seller-form" enctype="multipart/form-data">
+          <div class="grid-2">
+            <div class="input-group">
+              <label>اسم المالك</label>
+              <input
+                type="text"
+                id="seller-name"
+                name="sellerName"
+                class="neon-input-white"
+                style="background-color: #222; border-color: #333; color: #888"
+                readonly
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label>رقم الهاتف</label>
+              <input
+                type="tel"
+                id="seller-phone"
+                name="sellerPhone"
+                class="neon-input-white"
+                style="background-color: #222; border-color: #333; color: #888"
+                readonly
+                required
+              />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label>المحافظة</label>
+              <select
+                id="gov-select"
+                name="governorate"
+                class="neon-input-white"
+                required
+              >
+                <option value="">اختر المحافظة...</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>المدينة / المنطقة</label>
+              <select
+                id="city-select"
+                name="city"
+                class="neon-input-white"
+                required
+              >
+                <option value="">اختر المدينة...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label>فئة العقار</label>
+              <select
+                id="property-category"
+                name="propertyCategory"
+                class="neon-input-white"
+                onchange="toggleFields()"
+                required
+              >
+                <option value="apartment" selected>شقة / دوبلكس</option>
+                <option value="villa">فيلا / شاليه</option>
+                <option value="office">مكتب / عيادة</option>
+                <option value="store">محل تجاري</option>
+                <option value="building">عمارة بالكامل</option>
+                <option value="land">أرض</option>
+                <option value="warehouse">مخزن / مصنع</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>نوع العرض</label>
+              <select name="propertyType" class="neon-input-white" required>
+                <option value="بيع">بيع</option>
+                <option value="إيجار">إيجار</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>عنوان الإعلان</label>
+            <input
+              type="text"
+              name="propertyTitle"
+              class="neon-input-white"
+              required
+              placeholder="مثال: شقة للبيع في التجمع الخامس..."
+            />
+          </div>
+
+          <div class="english-num-tip">
+            <i class="fas fa-keyboard"></i> يرجى كتابة الأرقام بالإنجليزية فقط
+            (123)
+          </div>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label>السعر (ج.م)</label>
+              <input
+                type="number"
+                inputmode="numeric"
+                name="propertyPrice"
+                class="neon-input-white"
+                required
+                dir="ltr"
+                style="text-align: right"
+              />
+            </div>
+            <div class="input-group">
+              <label>المساحة (م²)</label>
+              <input
+                type="number"
+                inputmode="numeric"
+                name="propertyArea"
+                class="neon-input-white"
+                required
+                dir="ltr"
+                style="text-align: right"
+              />
+            </div>
+          </div>
+
+          <div class="input-group" id="finishing-group">
+            <label>نوع التشطيب</label>
+            <select
+              name="propertyFinishing"
+              id="property-finishing"
+              class="neon-input-white"
+            >
+              <option value="">اختر...</option>
+              <option value="بدون تشطيب">بدون تشطيب (طوب أحمر)</option>
+              <option value="نص تشطيب">نص تشطيب (محارة)</option>
+              <option value="تشطيب كامل">تشطيب كامل</option>
+              <option value="الترا لوكس">ألترا سوبر لوكس</option>
+              <option value="فرش فندقي">مفروش / فندقي</option>
+            </select>
+          </div>
+
+          <div class="input-group" id="land-type-group" style="display: none">
+            <label>نوع الأرض</label>
+            <select name="landType" class="neon-input-white">
+              <option value="">اختر...</option>
+              <option value="مباني">أرض مباني (سكنية)</option>
+              <option value="زراعية">أرض زراعية</option>
+              <option value="صناعية">أرض صناعية</option>
+              <option value="تجاري">أرض تجارية</option>
+            </select>
+          </div>
+
+          <div class="grid-2" id="rooms-group">
+            <div class="input-group">
+              <label>الغرف</label>
+              <input
+                type="number"
+                id="property-rooms"
+                name="propertyRooms"
+                class="neon-input-white"
+                min="0"
+                max="50"
+                dir="ltr"
+                style="text-align: right"
+              />
+            </div>
+            <div class="input-group">
+              <label>الحمامات</label>
+              <input
+                type="number"
+                id="property-bathrooms"
+                name="propertyBathrooms"
+                class="neon-input-white"
+                min="0"
+                max="20"
+                dir="ltr"
+                style="text-align: right"
+              />
+            </div>
+          </div>
+
+          <div class="input-group" id="level-group" style="display: none">
+            <label>الدور</label>
+            <select
+              name="propertyLevel"
+              id="property-level"
+              class="neon-input-white"
+            >
+              <option value="">اختر...</option>
+              <option value="أرضي">أرضي</option>
+              <option value="1">الأول</option>
+              <option value="2">الثاني</option>
+              <option value="3">الثالث</option>
+              <option value="4">الرابع</option>
+              <option value="5">الخامس</option>
+              <option value="6+">أعلى من الخامس</option>
+              <option value="أخير">الدور الأخير (رووف)</option>
+            </select>
+          </div>
+
+          <div class="grid-2" id="building-details-group" style="display: none">
+            <div class="input-group">
+              <label>عدد الأدوار</label>
+              <input
+                type="number"
+                name="propertyFloors"
+                id="property-floors"
+                class="neon-input-white"
+                min="1"
+                max="50"
+                dir="ltr"
+                style="text-align: right"
+                placeholder="مثال: 5"
+              />
+            </div>
+            <div class="input-group">
+              <label>عدد الشقق/الوحدات</label>
+              <input
+                type="number"
+                name="unitCount"
+                id="property-units"
+                class="neon-input-white"
+                min="1"
+                max="100"
+                dir="ltr"
+                style="text-align: right"
+                placeholder="مثال: 10"
+              />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>وصف تفصيلي</label>
+            <textarea
+              id="property-description"
+              name="propertyDescription"
+              rows="5"
+              class="neon-input-white"
+              placeholder="اكتب كل التفاصيل اللي تخلي المشتري يختار عقارك..."
+            ></textarea>
+          </div>
+
+          <div class="input-group">
+            <label>
+              <i
+                class="fas fa-map-marked-alt"
+                style="color: var(--neon-primary)"
+              ></i>
+              موقع العقار
+              <span style="font-size: 0.8rem; color: #888"
+                >(اختياري، لكن يفضل تحديده)</span
+              >
+            </label>
+
+            <div class="ai-insight-box">
+              <i class="fas fa-robot ai-icon"></i>
+              <div style="flex: 1">
+                <strong style="color: white">مساعد عقارك الذكي:</strong><br />
+                <span
+                  id="map-status-text"
+                  style="color: #bbb; font-size: 0.9rem"
+                >
+                  قم بالبحث عن اسم الشارع أو المنطقة، وسأقوم أنا بجلب الخدمات
+                  المحيطة تلقائياً!
+                </span>
+              </div>
+            </div>
+
+            <div class="map-wrapper">
+              <div class="map-search-container">
+                <div class="map-search-bar">
+                  <input
+                    type="text"
+                    id="map-search-input"
+                    class="map-search-input"
+                    placeholder="ابحث عن المنطقة، الحي، الشارع..."
+                    autocomplete="off"
+                  />
+                  <button
+                    type="button"
+                    class="map-search-btn"
+                    onclick="searchLocation()"
+                  >
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+                <div id="search-suggestions" class="search-suggestions"></div>
+              </div>
+
+              <div id="map"></div>
+
+              <button
+                type="button"
+                class="locate-fab-btn"
+                onclick="locateUser()"
+                title="تحديد موقعي"
+              >
+                <div
+                  id="mapLockOverlay"
+                  class="map-lock-overlay"
+                  onclick="openPermModal()"
+                >
+                  <div class="lock-icon-hint"><i class="fas fa-lock"></i></div>
+                </div>
+                <i class="fas fa-crosshairs"></i>
+              </button>
+            </div>
+            <input type="hidden" name="latitude" id="lat" />
+            <input type="hidden" name="longitude" id="lng" />
+            <input type="hidden" name="nearby_services" id="nearby_services" />
+          </div>
+
+          <div class="input-group">
+            <label>صور العقار (بحد أقصى 10 صور)</label>
+            <label for="property-images" class="btn-upload-trigger">
+              <i
+                class="fas fa-cloud-upload-alt"
+                style="font-size: 2rem; margin-bottom: 10px; display: block"
+              ></i>
+              اضغط هنا لاختيار الصور أو قم بسحبها
+            </label>
+            <input
+              type="file"
+              id="property-images"
+              name="images[]"
+              multiple
+              accept="image/*"
+              style="display: none"
+            />
+            <div class="image-preview-grid" id="image-preview-container"></div>
+          </div>
+
+          <div style="margin-top: 20px; text-align: center">
+            <p style="color: #777; font-size: 0.85rem">
+              <i class="fas fa-lock"></i> بياناتك مؤمنة ولن يتم مشاركتها إلا مع
+              المشترين الجادين.
+            </p>
+          </div>
+
+          <button type="submit" class="btn-neon-large-green">
+            نشر الإعلان الآن <i class="fas fa-rocket"></i>
+          </button>
+        </form>
+        <p id="seller-form-message" class="message"></p>
+      </div>
+    </main>
+
+    <footer class="main-footer">
+      <div class="footer-content">
+        <div class="social-links">
+          <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+          <a href="#" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <p>جميع الحقوق محفوظة © 2025 - عقارك</p>
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="seller-form.js"></script>
+    <script src="ban-check.js"></script>
+    <script src="global-alert.js"></script>
+    <div id="locationPermModal" class="perm-modal-overlay">
+      <div class="perm-modal-content">
+        <div class="perm-icon-box">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <h3 class="perm-title">تفعيل الموقع الجغرافي</h3>
+        <p class="perm-desc">
+          لتحسين تجربة البيع وتحديد الخدمات المحيطة بعقارك بدقة، يرجى السماح لنا
+          بالوصول لموقعك الحالي.
+        </p>
+        <button onclick="requestLocationAccess()" class="btn-perm-allow">
+          <i class="fas fa-check"></i> تفعيل الموقع الآن
+        </button>
+        <button onclick="closePermModal()" class="btn-perm-cancel">
+          ليس الآن، سأقوم بالتحديد يدوياً
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
