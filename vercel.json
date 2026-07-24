@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "PUPPETEER_SKIP_DOWNLOAD=true npm install --legacy-peer-deps",
   "builds": [
     {
       "src": "server.js",
