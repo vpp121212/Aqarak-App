@@ -734,6 +734,24 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <p>جاري البحث...</p>
                     </div>
                 </div>
+
+                <div id="map3d-section" style="margin-top: 50px; display: none;">
+                    <h2 style="margin-bottom: 20px; border-bottom: 2px solid var(--neon-primary); display:inline-block; padding-bottom:5px; color:white;">
+                        <i class="fas fa-mountain"></i> خريطة الموقع ثلاثية الأبعاد
+                    </h2>
+                    <div id="map3d-container" style="width: 100%; height: 400px; border-radius: 16px; overflow: hidden; border: 1px solid #333;"></div>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button onclick="resetMap3D()" style="flex:1; padding: 10px; background: rgba(0,255,136,0.1); border: 1px solid var(--neon-primary); color: var(--neon-primary); border-radius: 10px; cursor: pointer; font-family: inherit;">
+                            <i class="fas fa-sync-alt"></i> إعادة ضبط
+                        </button>
+                        <button onclick="toggleMap3DMode()" style="flex:1; padding: 10px; background: rgba(0,212,255,0.1); border: 1px solid var(--neon-secondary); color: var(--neon-secondary); border-radius: 10px; cursor: pointer; font-family: inherit;">
+                            <i class="fas fa-cube"></i> تبديل الوضع
+                        </button>
+                        <button id="style-toggle-btn" onclick="toggleMap3DStyle()" style="flex:1; padding: 10px; background: rgba(255,215,0,0.1); border: 1px solid #FFD700; color: #FFD700; border-radius: 10px; cursor: pointer; font-family: inherit;">
+                            <i class="fas fa-palette"></i> فاضي
+                        </button>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -830,6 +848,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     loadSimilarProperties(property);
     if (window.setupLightbox) window.setupLightbox(imageUrls);
+
+    if (property.latitude && property.longitude) {
+      await initMap3D(parseFloat(property.latitude), parseFloat(property.longitude));
+    }
 
     const offerForm = document.getElementById("offer-form");
     if (offerForm) {
@@ -1643,4 +1665,149 @@ window.showWarningAnim = (title, msg) => {
     </div>
   `;
   document.body.insertAdjacentHTML("beforeend", html);
+};
+let map3DInstance = null;
+let map3DMode = "3d";
+let map3DStyle = "satellite";
+let currentLat, currentLng;
+let MAPBOX_TOKEN = "";
+
+const MAP_STYLES = {
+  satellite: "mapbox://styles/mapbox/satellite-streets-v12",
+  dark: "mapbox://styles/mapbox/dark-v11",
+  night: "mapbox://styles/mapbox/navigation-night-v1"
+};
+
+async function loadMapboxToken() {
+  try {
+    const res = await fetch("/api/mapbox-token");
+    const data = await res.json();
+    MAPBOX_TOKEN = data.token;
+  } catch (e) {
+    console.error("Failed to load Mapbox token");
+  }
+}
+
+function add3DBuildings(map) {
+  if (map.getLayer("3d-buildings")) return;
+  const layers = map.getStyle().layers;
+  let labelLayerId;
+  for (let i = 0; i < layers.length; i++) {
+    if (layers[i].type === "symbol" && layers[i].layout["text-field"]) {
+      labelLayerId = layers[i].id;
+      break;
+    }
+  }
+  map.addLayer({
+    id: "3d-buildings",
+    source: "composite",
+    "source-layer": "building",
+    filter: ["==", "extrude", "true"],
+    type: "fill-extrusion",
+    minzoom: 14,
+    paint: {
+      "fill-extrusion-color": [
+        "interpolate", ["linear"], ["get", "height"],
+        0, "#1a1a2e",
+        50, "#16213e",
+        100, "#0f3460",
+        200, "#533483"
+      ],
+      "fill-extrusion-height": ["get", "height"],
+      "fill-extrusion-base": ["get", "min_height"],
+      "fill-extrusion-opacity": 0.85
+    }
+  }, labelLayerId);
+}
+
+async function initMap3D(lat, lng) {
+  const section = document.getElementById("map3d-section");
+  if (!section) return;
+  section.style.display = "block";
+  currentLat = lat;
+  currentLng = lng;
+
+  await loadMapboxToken();
+  if (!MAPBOX_TOKEN) return;
+
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+
+  map3DInstance = new mapboxgl.Map({
+    container: "map3d-container",
+    style: MAP_STYLES.satellite,
+    center: [lng, lat],
+    zoom: 15,
+    pitch: 60,
+    bearing: -17.6,
+    antialias: true
+  });
+
+  map3DInstance.addControl(new mapboxgl.NavigationControl(), "top-left");
+
+  map3DInstance.on("load", () => {
+    map3DInstance.addSource("mapbox-dem", {
+      type: "raster-dem",
+      url: "mapbox://mapbox.terrain-dem-v1",
+      tileSize: 512,
+      maxzoom: 14
+    });
+    map3DInstance.setTerrain({ source: "mapbox-dem", exaggeration: 1.5 });
+
+    map3DInstance.addLayer({
+      id: "sky",
+      type: "sky",
+      paint: {
+        "sky-type": "atmosphere",
+        "sky-atmosphere-sun": [0.0, 0.0],
+        "sky-atmosphere-sun-intensity": 15
+      }
+    });
+
+    add3DBuildings(map3DInstance);
+
+    new mapboxgl.Marker({ color: "#00ff88" })
+      .setLngLat([lng, lat])
+      .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML("<b>موقع العقار</b>"))
+      .addTo(map3DInstance);
+  });
+}
+
+window.resetMap3D = function () {
+  if (map3DInstance) {
+    map3DInstance.resetNorthPitch();
+  }
+};
+
+window.toggleMap3DMode = function () {
+  if (!map3DInstance) return;
+  if (map3DMode === "3d") {
+    map3DInstance.easeTo({ pitch: 0, duration: 1000 });
+    map3DMode = "2d";
+  } else {
+    map3DInstance.easeTo({ pitch: 60, bearing: -17.6, duration: 1000 });
+    map3DMode = "3d";
+  }
+};
+
+window.toggleMap3DStyle = function () {
+  if (!map3DInstance) return;
+  const styles = Object.keys(MAP_STYLES);
+  const currentIndex = styles.indexOf(map3DStyle);
+  map3DStyle = styles[(currentIndex + 1) % styles.length];
+  map3DInstance.setStyle(MAP_STYLES[map3DStyle]);
+  map3DInstance.once("style.load", () => {
+    map3DInstance.addSource("mapbox-dem", {
+      type: "raster-dem",
+      url: "mapbox://mapbox.terrain-dem-v1",
+      tileSize: 512,
+      maxzoom: 14
+    });
+    map3DInstance.setTerrain({ source: "mapbox-dem", exaggeration: 1.5 });
+    add3DBuildings(map3DInstance);
+  });
+  const btn = document.getElementById("style-toggle-btn");
+  if (btn) {
+    const labels = { satellite: "فاضي", dark: "داكن", night: "ليلي" };
+    btn.innerHTML = `<i class="fas fa-palette"></i> ${labels[map3DStyle]}`;
+  }
 };

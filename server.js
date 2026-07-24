@@ -125,6 +125,7 @@ app.use(
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "aqarak-secure-secret-key-2025";
 const APP_URL = "https://aqarakeg.com";
+const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSy_PUT_YOUR_KEY_HERE";
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -2460,6 +2461,10 @@ app.get("/emergency-fix-columns", async (req, res) => {
 
 app.get("/api/ping", (req, res) => {
   res.json({ status: "OK", message: "Server is running 🚀" });
+});
+
+app.get("/api/mapbox-token", (req, res) => {
+  res.json({ token: MAPBOX_TOKEN });
 });
 
 app.delete("/api/user/property/:id", async (req, res) => {
