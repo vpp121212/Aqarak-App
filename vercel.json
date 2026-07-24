@@ -1,5 +1,5 @@
 {
-  "installCommand": "PUPPETEER_SKIP_DOWNLOAD=true npm install --legacy-peer-deps",
+  "installCommand": "npx puppeteer browsers install chrome || true && npm install --legacy-peer-deps",
   "builds": [
     {
       "src": "server.js",
@@ -11,5 +11,8 @@
       "src": "/(.*)",
       "dest": "server.js"
     }
-  ]
+  ],
+  "env": {
+    "PUPPETEER_SKIP_DOWNLOAD": "true"
+  }
 }
