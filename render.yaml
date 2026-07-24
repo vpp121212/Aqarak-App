@@ -3,7 +3,7 @@ services:
     name: aqarak-app
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install --legacy-peer-deps
     startCommand: node server.js
     envVars:
       - key: DATABASE_URL
