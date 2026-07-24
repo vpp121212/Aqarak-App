@@ -207,7 +207,7 @@ function renderProperties(properties) {
                 }</h3>
                 <div style="color:#FFD700; font-weight:bold; font-size:1.2rem;">${Number(
                   prop.price || 0
-                ).toLocaleString()} ج.م</div>
+                ).toLocaleString()} ر.س</div>
                 <div style="color:#aaa; font-size:0.9rem; margin-top:10px; display:flex; gap:10px;">
                     <span><i class="fas fa-bed"></i> ${prop.rooms || 0}</span>
                     <span><i class="fas fa-bath"></i> ${

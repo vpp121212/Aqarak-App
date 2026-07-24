@@ -6,7 +6,7 @@ function formatPrice(price, type) {
     maximumFractionDigits: 0,
   }).format(numericPart);
 
-  const currency = "ج.م.";
+  const currency = "ر.س.";
   const period = type && type === "إيجار" ? "/ شهر" : "";
 
   return `${formatted} ${currency}${period}`;

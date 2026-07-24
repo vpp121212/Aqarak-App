@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (data.banned) {
         const message = `مرحباً دعم عقارك،\nحسابي (@${data.username}) تم حظره وأريد الاستفسار.\nرقم الهاتف: ${data.phone}`;
-        const waUrl = `https://wa.me/201008102237?text=${encodeURIComponent(
+        const waUrl = `https://wa.me/966500000000?text=${encodeURIComponent(
           message
         )}`;
 

@@ -117,7 +117,7 @@ window.formatPrice = (price, type) => {
   if (!price) return "N/A";
   const formatted = parseFloat(price).toLocaleString("ar-EG", {
     style: "currency",
-    currency: "EGP",
+    currency: "SAR",
     minimumFractionDigits: 0,
   });
   return `<span class="detail-price">${formatted}</span> ${
@@ -233,7 +233,7 @@ async function loadSimilarProperties(currentProperty) {
                         <h4 style="font-size:1rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:white;">${
                           prop.title
                         }</h4>
-                        <p class="price" style="font-size:1rem; color:var(--neon-primary); font-weight:bold;">${priceVal} ج.م</p>
+                        <p class="price" style="font-size:1rem; color:var(--neon-primary); font-weight:bold;">${priceVal} ر.س</p>
                     </div>
                 </div>
             `;
@@ -467,7 +467,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? property.sellerPhone.replace(/\D/g, "").startsWith("0")
           ? "2" + property.sellerPhone
           : property.sellerPhone
-        : "201008102237";
+        : "966500000000";
       const negLink = `https://wa.me/${negOwnerPhone}?text=${encodeURIComponent(
         `سلام عليكم، كنت محتاج أتفاوض بخصوص السعر للعقار: ${property.title}`
       )}`;

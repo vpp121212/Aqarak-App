@@ -173,7 +173,7 @@ async function fetchLatestProperties(isFirstLoad = false) {
                     <div class="adv-card-img-box">
                         <img src="${bgImage}" alt="${prop.title}" class="adv-card-img" loading="lazy">
                         <span class="adv-type-badge ${typeClass}">${typeText}</span>
-                        <div class="adv-price-tag">${priceText} ج.م</div>
+                        <div class="adv-price-tag">${priceText} ر.س</div>
                         ${extraBadges} 
                     </div>
                     <div class="adv-card-body">

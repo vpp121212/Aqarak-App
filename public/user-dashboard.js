@@ -260,7 +260,7 @@ async function toggleFavorites() {
                         <img src="${
                           prop.imageUrl || "logo.png"
                         }" class="fav-img" loading="lazy" alt="${prop.title}">
-                        <div class="price-badge">${price} ج.م</div>
+                        <div class="price-badge">${price} ر.س</div>
                     </a>
                     <div class="fav-content">
                         <div>

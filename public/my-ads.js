@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <a href="${link}" ${clickAction} class="ad-item">
                             <div class="ad-info">
                                 <h3>${prop.title} ${statusHtml}</h3>
-                                <div class="ad-price">${price} ج.م <span style="font-size:0.85rem; color:#888; font-weight:normal;">(${typeLabel})</span></div>
+                                <div class="ad-price">${price} ر.س <span style="font-size:0.85rem; color:#888; font-weight:normal;">(${typeLabel})</span></div>
                             </div>
                             <i class="fas fa-chevron-left arrow-icon"></i>
                         </a>

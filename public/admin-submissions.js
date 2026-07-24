@@ -67,7 +67,7 @@ function createSubmissionCard(submission) {
                 }</div>
                 <div class="info-item"><strong><i class="fas fa-money-bill-wave"></i> السعر:</strong> ${Number(
                   submission.propertyPrice
-                ).toLocaleString()} ج.م</div>
+                ).toLocaleString()} ر.س</div>
                 <div class="info-item"><strong><i class="fas fa-ruler-combined"></i> المساحة:</strong> ${
                   submission.propertyArea
                 } م²</div>

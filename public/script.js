@@ -25,11 +25,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.disabled = true;
 
       const phone = document.getElementById("login-phone").value;
-      const egyptPhoneRegex = /^01[0-2,5]{1}[0-9]{8}$/;
+      const saudiPhoneRegex = /^05[0-9]{8}$/;
 
-      if (!egyptPhoneRegex.test(phone)) {
+      if (!saudiPhoneRegex.test(phone)) {
         showWarning(
-          "رقم الهاتف غير صحيح. تأكد أنه يبدأ بـ 010, 011, 012, أو 015 ومكون من 11 رقم."
+          "رقم الهاتف غير صحيح. تأكد أنه يبدأ بـ 05 ومكون من 10 أرقام."
         );
         if (typeof btn !== "undefined") {
           btn.innerHTML = originalText;
@@ -159,15 +159,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       ).value;
 
       if (!isOtpSent) {
-        if (phone.length < 11) {
-          showWarning("رقم الهاتف غير كامل، يجب أن يكون 11 رقم.");
+        if (phone.length < 10) {
+          showWarning("رقم الهاتف غير كامل، يجب أن يكون 10 أرقام.");
           return;
         }
 
-        const egyptPhoneRegex = /^01[0-2,5]{1}[0-9]{8}$/;
-        if (!egyptPhoneRegex.test(phone)) {
+        const saudiPhoneRegex = /^05[0-9]{8}$/;
+        if (!saudiPhoneRegex.test(phone)) {
           showWarning(
-            "رقم الهاتف غير صحيح. يجب أن يبدأ بـ 010, 011, 012, أو 015."
+            "رقم الهاتف غير صحيح. يجب أن يبدأ بـ 05."
           );
           return;
         }

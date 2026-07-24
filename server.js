@@ -130,7 +130,7 @@ app.use(
 );
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "aqarak-secure-secret-key-2025";
-const APP_URL = "https://aqarakeg.com";
+const APP_URL = "https://aqarak.sa";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSy_PUT_YOUR_KEY_HERE";
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -142,7 +142,7 @@ const DEFAULT_SYSTEM_INSTRUCTION = `
 
 ⚠️ قواعد صارمة:
 1. إذا سألك المستخدم عن أي شيء خارج نطاق "كيفية استخدام الموقع" (مثل أسئلة عامة، سياسة، دين، نكت، نصائح استثمارية)، اعتذر بلباقة وقل: "عذراً، أنا دليل استخدام لموقع عقارك الذكي فقط."
-2. تحدث بلهجة مصرية ودودة ومحترفة.
+2. تحدث بلهجة سعودية ودودة ومحترفة.
 
 📘 دليل استخدام موقع عقارك:
 
@@ -160,7 +160,7 @@ const DEFAULT_SYSTEM_INSTRUCTION = `
 3️⃣ **اعرض عقارك (للبائعين):**
 - دوس "اعرض عقارك" واملى البيانات.
 - حدد الموقع ع الخريطة عشان الخدمات تظهر للمشتري.
-- لو عندك فيديو، ابعتهولنا واتساب على 01008102237 واحنا هنضيفه.
+- لو عندك فيديو، ابعتهولنا واتساب على 0500000000 واحنا هنضيفه.
 - النشر بيتم في ثواني بعد المراجعة.
 
 4️⃣ **تفاصيل العقار والتواصل:**
@@ -369,8 +369,8 @@ async function sendWhatsAppMessage(phone, message) {
   try {
     if (!whatsappClient) return false;
     let formattedNumber = phone.replace(/\D/g, "");
-    if (formattedNumber.startsWith("01"))
-      formattedNumber = "2" + formattedNumber;
+    if (formattedNumber.startsWith("05"))
+      formattedNumber = "966" + formattedNumber;
     const numberDetails = await whatsappClient.getNumberId(formattedNumber);
     if (numberDetails) {
       await whatsappClient.sendMessage(numberDetails._serialized, message);
@@ -464,7 +464,7 @@ async function checkAndNotifyMatches(propertyDetails) {
 
       if (reportCheck.rows.length > 0) continue;
 
-      const buyerMsg = `🎉 بشرى سارة يا ${req.name}!\n\nطلبك توفر عندنا في "عقارك"! 🏠\nعقار جديد: *${propertyDetails.title}*\n📍 الموقع: ${propertyDetails.city} - ${propertyDetails.governorate}\n💰 السعر: ${propertyDetails.price} ج.م\n\n🔗 التفاصيل والصور: ${APP_URL}/property-details?id=${propertyDetails.id}\n\n📞 للتواصل مع المالك: ${propertyDetails.sellerPhone}`;
+      const buyerMsg = `🎉 بشرى سارة يا ${req.name}!\n\nطلبك توفر عندنا في "عقارك"! 🏠\nعقار جديد: *${propertyDetails.title}*\n📍 الموقع: ${propertyDetails.city} - ${propertyDetails.governorate}\n💰 السعر: ${propertyDetails.price} ر.س\n\n🔗 التفاصيل والصور: ${APP_URL}/property-details?id=${propertyDetails.id}\n\n📞 للتواصل مع المالك: ${propertyDetails.sellerPhone}`;
       const sellerMsg = `🚀 عقارك لقطة ومطلوب!\n\nالسيستم لقى مشتري مهتم بنفس مواصفات عقارك *(${propertyDetails.title})*.\n\n👤 الاسم: ${req.name}\n📞 رقمه: ${req.phone}\n\nتواصل معاه فوراً وبالتوفيق! 😉`;
       
       notifications.push(
@@ -568,7 +568,7 @@ async function aiCheckProperty(title, description, price, imageUrls, category) {
 {
   "status": "approved" أو "pending" أو "rejected",
   "reason": "سبب التعليق باختصار للعرض للمستخدم",
-  "user_message": "رسالة للمستخدم باللهجة المصرية توضح النتيجة",
+  "user_message": "رسالة للمستخدم باللهجة السعودية توضح النتيجة",
   "marketing_description": "اكتب وصف تسويقي جذاب جداً لهذا العقار بناءً على الصور والبيانات"
 }
 `;
@@ -808,9 +808,9 @@ app.get("/property", async (req, res) => {
       )
       .replace(
         /{{IMAGE}}/g,
-        property.imageUrl || "https://aqarakeg.com/logo.png"
+        property.imageUrl || "https://aqarak.sa/logo.png"
       )
-      .replace(/{{URL}}/g, `https://aqarakeg.com/property?id=${propertyId}`);
+      .replace(/{{URL}}/g, `https://aqarak.sa/property?id=${propertyId}`);
 
     res.send(htmlContent);
   } catch (error) {
@@ -832,135 +832,19 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
-const EGYPT_LOCATIONS = {
-  قاهرة: [
-    "القاهرة",
-    "التجمع",
-    "الشروق",
-    "مدينتي",
-    "الرحاب",
-    "المستقبل",
-    "العاصمة الادارية",
-    "مصر الجديدة",
-    "مدينة نصر",
-    "المعادي",
-    "زهراء المعادي",
-    "المقطم",
-    "القطامية",
-    "الزيتون",
-    "عين شمس",
-    "المرج",
-    "السلام",
-    "العباسية",
-    "وسط البلد",
-    "الزمالك",
-    "جاردن سيتي",
-    "شبرا مصر",
-    "حلوان",
-    "المعصرة",
-    "15 مايو",
-    "بدر",
-    "حدائق القبة",
-    "الوايلي",
-    "المنيل",
-    "السيدة زينب",
-    "الازبكية",
-    "بولاق",
-    "عابدين",
-    "الموسكي",
-    "الخليفة",
-    "المطرية",
-    "النزهة",
-    "شيراتون",
-    "الالف مسكن",
-    "الحلمية",
-    "منشأة ناصر",
-    "طرة",
-    "المعصرة",
-    "التبين",
-  ],
-  جيزة: [
-    "الجيزة",
-    "6 أكتوبر",
-    "الشيخ زايد",
-    "حدائق الأهرام",
-    "الدقي",
-    "المهندسين",
-    "الهرم",
-    "فيصل",
-    "العجوزة",
-    "إمبابة",
-    "الوراق",
-    "بولاق الدكرور",
-    "العمرانية",
-    "المنيب",
-    "البدرشين",
-    "العياط",
-    "الصف",
-    "أطفيح",
-    "كرداسة",
-    "أوسيم",
-    "الحوامدية",
-    "حدائق اكتوبر",
-    "ابو النمرس",
-    "منشأة القناطر",
-    "الواحات البحرية",
-    "ميت عقبة",
-    "بين السرايات",
-    "الكيت كات",
-    "أرض اللواء",
-    "ناهيا",
-    "صفط اللبن",
-    "كفر طهرمس",
-    "الطوابق",
-    "المريوطية",
-    "الرماية",
-  ],
-  اسكندرية: [
-    "الاسكندرية",
-    "سموحة",
-    "ميامي",
-    "سيدي بشر",
-    "المنتزه",
-    "العجمي",
-    "الساحل الشمالي",
-    "محرم بك",
-    "الشاطبي",
-    "كامب شيزار",
-    "الإبراهيمية",
-    "سبورتنج",
-    "كليوباترا",
-    "سيدي جابر",
-    "رشدي",
-    "جليم",
-    "زيزينيا",
-    "باكوس",
-    "فلمنج",
-    "الظاهرية",
-    "العصافرة",
-    "المندرة",
-    "المعمورة",
-    "أبوقير",
-    "الهانوفيل",
-    "البيطاش",
-    "الكيلو 21",
-    "كينج مريوط",
-    "برج العرب",
-    "العامرية",
-    "الدخيلة",
-    "المكس",
-    "القباري",
-    "كرموز",
-    "غيط العنب",
-    "كوم الدكة",
-    "العطارين",
-    "المنشية",
-    "الجمرك",
-    "الانفوشي",
-    "راس التين",
-    "المندرة",
-    "ابيس",
-  ],
+const SAUDI_LOCATIONS = {
+  الرياض: ["الرياض", "حيدر آباد", "الظهران", "العليا", "الملز", "النسيم", "العليا", "الروضة", "الفيصلية", "الدانة", "الياسمين", "النرجس", "المحمدية", "السويدي", "حطين", "الغدير", "عرقة", "البديعة", "المروج", "الورود", "الربيع", "النزهة", "الواحة", "العزيزية", "الصفراء", "الغاط", "الدليم", "السليل", "وادي الدواسر", "الأفلاج", "المجمعة", "الخرج", "الدوادمي", "سيال", "الزلفي", "المدينة المنورة", "العلا", "بدر", "ينبع", "الحناكية", "العيسلة"],
+  جدة: ["جدة", "الشاطئ", "الفيصلية", "أبحر", "الحمرا", "الروضة", "الравيع", "الصالحية", "البانوراما", "النخيل", "المرجان", "السنابل", "النعيم", "كريمي", "ال.trace", "المنار"],
+  "مكة المكرمة": ["مكة المكرمة", "العزيزية", "العمرة", "النسيم", "الزاهر", "الهجرة", "الحجون", "أجياد", "الشفا", "الكعكية", "ال Rusaisy", "التنعيم", "السيل الصغير", "السر", "قرن المنازل"],
+  الدمام: ["الدمام", "الظهران", "الخبر", "القطيف", "سيهات", "تاروت", "الجبيل", "الصفوى", "رأس تنورة", "الظهران", "الفيصلية", "المزروعية", "الهدا"],
+  الطائف: ["الطائف", "الهدا", "الشmiss", "الروضة", "العقيق"],
+  أبها: ["أبها", "خميس مشيط", "النماص", "بيشة", "تنومة", "الحرجة", "سراة عبيدة", "بلجرشي", "العرين"],
+  تبوك: ["تبوك", "العلا", "ضباء", "الشقيق", "تيماء", "الحمراء"],
+  عنيزة: ["عنيزة", "بُريدة", "الرس", "المذنب", "الأحمدي", "القصيم"],
+  حائل: ["حائل", "بقعاء", "السليمي", "الغزالة", "الحائط"],
+  الجبيل: ["الجبيل", "الجبيل الصناعية", "الزور"],
+  نجران: ["نجران", "صبيا", "بيشة", "الدرب", "الحرث", "شرورة"],
+  ينبع: ["ينبع", "ينبع البحر", "العصافير", "الخريب"],
 };
 
 function getLevenshteinDistance(a, b) {
@@ -986,7 +870,7 @@ function expandSearchKeywords(message) {
   const normalizedMsg = normalizeText(message);
   const userWords = normalizedMsg.split(/\s+/);
   let expandedKeywords = [];
-  for (const [gov, cities] of Object.entries(EGYPT_LOCATIONS)) {
+  for (const [gov, cities] of Object.entries(SAUDI_LOCATIONS)) {
     for (const word of userWords) {
       if (word.length < 3) continue;
       const normGov = normalizeText(gov);
@@ -1102,7 +986,7 @@ app.post("/api/chat", async (req, res) => {
       }
     }
 
-    const phoneRegex = /(010|011|012|015)\d{8}/;
+    const phoneRegex = /^05[0-9]{8}$/;
     const phoneMatch = message.match(phoneRegex);
     if (phoneMatch) {
       const recentHistory = chatHistories[sessionId].history.slice(2).slice(-6);
@@ -1765,7 +1649,7 @@ app.post("/api/make-offer", async (req, res) => {
       "💰 عرض سعر جديد",
       [
         { name: "🏠 العقار", value: propRes.rows[0]?.title || "غير معروف" },
-        { name: "📉 العرض", value: `${offerPrice} ج.م` },
+        { name: "📉 العرض", value: `${offerPrice} ر.س` },
         { name: "👤 المشتري", value: `${buyerName} - ${buyerPhone}` },
       ],
       16753920
@@ -2882,7 +2766,7 @@ app.post("/api/admin/manual-charge", async (req, res) => {
 
     res.json({
       success: true,
-      message: `تم شحن ${amount} نقطة (بقيمة ${moneyValue} ج.م) للرقم ${phone} بنجاح 🚀`,
+      message: `تم شحن ${amount} نقطة (بقيمة ${moneyValue} ر.س) للرقم ${phone} بنجاح 🚀`,
     });
   } catch (error) {
     console.error("Manual Charge Error:", error);
@@ -3014,7 +2898,7 @@ app.post("/api/payment/charge", async (req, res) => {
     const settingRes = await getBotSetting('point_price');
     const pricePerPoint = parseFloat(settingRes || 1);
 
-    const amountEGP = points * pricePerPoint;
+    const amountSAR = points * pricePerPoint;
 
     let integrationId;
     if (method === "wallet") {
@@ -3038,17 +2922,17 @@ app.post("/api/payment/charge", async (req, res) => {
       {
         auth_token: authToken,
         delivery_needed: "false",
-        amount_cents: amountEGP * 100,
-        currency: "EGP",
+        amount_cents: amountSAR * 100,
+        currency: "SAR",
         items: [],
       }
     );
     const paymobOrderId = orderRes.data.id;
 
     await pgQuery(
-      `INSERT INTO payment_orders (user_id, paymob_order_id, amount_egp, points_amount, payment_method, status) 
+      `INSERT INTO payment_orders (user_id, paymob_order_id, amount_sar, points_amount, payment_method, status) 
              VALUES ($1, $2, $3, $4, $5, 'pending')`,
-      [decoded.id, paymobOrderId, amountEGP, points, method]
+      [decoded.id, paymobOrderId, amountSAR, points, method]
     );
 
     const userRes = await pgQuery("SELECT * FROM users WHERE id = $1", [
@@ -3060,7 +2944,7 @@ app.post("/api/payment/charge", async (req, res) => {
       "https://accept.paymob.com/api/acceptance/payment_keys",
       {
         auth_token: authToken,
-        amount_cents: amountEGP * 100,
+        amount_cents: amountSAR * 100,
         expiration: 3600,
         order_id: paymobOrderId,
         billing_data: {
@@ -3070,7 +2954,7 @@ app.post("/api/payment/charge", async (req, res) => {
           first_name: user.name || "Client",
           street: "NA",
           building: "NA",
-          phone_number: mobileNumber || user.phone || "01000000000",
+          phone_number: mobileNumber || user.phone || "0500000000",
           shipping_method: "NA",
           postal_code: "NA",
           city: "Cairo",
@@ -3078,7 +2962,7 @@ app.post("/api/payment/charge", async (req, res) => {
           last_name: "Aqarak",
           state: "NA",
         },
-        currency: "EGP",
+        currency: "SAR",
         integration_id: integrationId,
       }
     );
@@ -3184,7 +3068,7 @@ app.get("/api/payment/callback", async (req, res) => {
             [
               userPhoneRes.rows[0].phone,
               pendingOrder.points_amount,
-              pendingOrder.amount_egp,
+              pendingOrder.amount_sar,
               `شحن ${pendingOrder.points_amount} نقطة (${pendingOrder.payment_method})`,
               new Date().toISOString(),
             ]
@@ -3194,7 +3078,7 @@ app.get("/api/payment/callback", async (req, res) => {
             [
               { name: "المستخدم", value: userPhoneRes.rows[0].phone },
               { name: "النقاط", value: `${pendingOrder.points_amount}` },
-              { name: "المبلغ", value: `${pendingOrder.amount_egp} EGP` },
+              { name: "المبلغ", value: `${pendingOrder.amount_sar} SAR` },
             ],
             3066993
           );
@@ -3944,7 +3828,7 @@ app.post("/api/user/remove-report", async (req, res) => {
 async function aiParseSearchQuery(query) {
   try {
     const prompt = `
-        You are a Real Estate Search Assistant for Egypt.
+        You are a Real Estate Search Assistant for Saudi Arabia.
         User Query: "${query}"
         
         Task: Correct spelling (Arabic/Franco), extract location, property type, and price budget if found.
@@ -4355,7 +4239,7 @@ app.post("/api/reviews", async (req, res) => {
       const prompt = `
         أنت خبير علاقات عامة. دي آراء عملاء عن (سمسار/مالك عقارات):
         ${textComments}
-        المطلوب: اكتب "كبسولة سمعة" (سطرين بالكتير) باللهجة المصرية الشيك.
+        المطلوب: اكتب "كبسولة سمعة" (سطرين بالكتير) باللهجة السعودية الشيك.
         عايز الخلاصة: هل هو "ثقة وأمين" ولا "مماطل"؟ وايه أبرز ميزة؟
         بدون مقدمات زي "بناء على الآراء..". ادخل في الموضوع علطول.
         مثال: "شخص محترم جداً في المواعيد وأمين في الوصف، بس بيأخر الرد على الواتساب شوية."
@@ -4528,7 +4412,7 @@ app.post("/api/reviews/summarize", async (req, res) => {
     ${textComments}
     
     المطلوب:
-    اكتب ملخص قصير جداً (لا يزيد عن سطرين) باللهجة المصرية يوضح سمعة هذا الشخص، وأبرز مميزاته وعيوبه بناءً على كلام الناس.
+    اكتب ملخص قصير جداً (لا يزيد عن سطرين) باللهجة السعودية يوضح سمعة هذا الشخص، وأبرز مميزاته وعيوبه بناءً على كلام الناس.
     ابدأ الملخص بـ "خلاصة رأي الناس:" واكتب بإيجابية وموضوعية.
     `;
 
@@ -4908,12 +4792,12 @@ app.get("/profile", async (req, res) => {
 
       let image = user.profile_picture;
       if (!image || image.includes("logo.png")) {
-        image = "https://www.aqarakeg.com/logo.png";
+        image = "https://www.aqarak.sa/logo.png";
       } else if (!image.startsWith("http")) {
-        image = `https://www.aqarakeg.com${image}`;
+        image = `https://www.aqarak.sa${image}`;
       }
 
-      const url = `https://www.aqarakeg.com/profile?u=${username}`;
+      const url = `https://www.aqarak.sa/profile?u=${username}`;
 
       html = html
         .replace(/{{OG_TITLE}}/g, title)
