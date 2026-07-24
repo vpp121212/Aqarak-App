@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const compression = require("compression");
 
 const { Client, RemoteAuth } = require("whatsapp-web.js");
 const originalSendMessage = Client.prototype.sendMessage;
@@ -27,6 +28,7 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const app = express();
 
+app.use(compression());
 app.set("trust proxy", 1);
 
 const limiter = rateLimit({
@@ -176,6 +178,15 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
+
+const botSettingsCache = {};
+async function getBotSetting(key) {
+  if (botSettingsCache[key] !== undefined) return botSettingsCache[key];
+  const res = await pgQuery("SELECT setting_value FROM bot_settings WHERE setting_key = $1", [key]);
+  botSettingsCache[key] = res.rows.length > 0 ? res.rows[0].setting_value : null;
+  return botSettingsCache[key];
+}
+function invalidateBotSetting(key) { delete botSettingsCache[key]; }
 const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY;
 const PAYMOB_HMAC = process.env.PAYMOB_HMAC;
 const PAYMOB_INTEGRATION_CARD = process.env.PAYMOB_INTEGRATION_CARD;
@@ -429,6 +440,7 @@ async function checkAndNotifyMatches(propertyDetails) {
 
     console.log(`✅ وجدنا ${requests.rows.length} طلب مطابق.`);
 
+    const notifications = [];
     for (const req of requests.rows) {
       const reportCheck = await pgQuery(
         `
@@ -442,11 +454,15 @@ async function checkAndNotifyMatches(propertyDetails) {
       if (reportCheck.rows.length > 0) continue;
 
       const buyerMsg = `🎉 بشرى سارة يا ${req.name}!\n\nطلبك توفر عندنا في "عقارك"! 🏠\nعقار جديد: *${propertyDetails.title}*\n📍 الموقع: ${propertyDetails.city} - ${propertyDetails.governorate}\n💰 السعر: ${propertyDetails.price} ج.م\n\n🔗 التفاصيل والصور: ${APP_URL}/property-details?id=${propertyDetails.id}\n\n📞 للتواصل مع المالك: ${propertyDetails.sellerPhone}`;
-      await sendWhatsAppMessage(req.phone, buyerMsg);
-
       const sellerMsg = `🚀 عقارك لقطة ومطلوب!\n\nالسيستم لقى مشتري مهتم بنفس مواصفات عقارك *(${propertyDetails.title})*.\n\n👤 الاسم: ${req.name}\n📞 رقمه: ${req.phone}\n\nتواصل معاه فوراً وبالتوفيق! 😉`;
-      await sendWhatsAppMessage(propertyDetails.sellerPhone, sellerMsg);
+      
+      notifications.push(
+        sendWhatsAppMessage(req.phone, buyerMsg),
+        sendWhatsAppMessage(propertyDetails.sellerPhone, sellerMsg)
+      );
     }
+    
+    await Promise.allSettled(notifications);
   } catch (e) {
     console.error("Matching Error:", e);
   }
@@ -686,6 +702,26 @@ async function createTables() {
     );
 
     console.log("✅ Tables, Triggers & Ban System synced.");
+
+    const indexes = [
+      `CREATE INDEX IF NOT EXISTS idx_properties_sellerPhone ON properties("sellerPhone")`,
+      `CREATE INDEX IF NOT EXISTS idx_properties_type ON properties(type)`,
+      `CREATE INDEX IF NOT EXISTS idx_properties_numericPrice ON properties("numericPrice")`,
+      `CREATE INDEX IF NOT EXISTS idx_properties_governorate ON properties(governorate)`,
+      `CREATE INDEX IF NOT EXISTS idx_properties_city ON properties(city)`,
+      `CREATE INDEX IF NOT EXISTS idx_properties_isFeatured ON properties("isFeatured")`,
+      `CREATE INDEX IF NOT EXISTS idx_favorites_user_phone ON favorites(user_phone)`,
+      `CREATE INDEX IF NOT EXISTS idx_user_ratings_reviewed_phone ON user_ratings(reviewed_phone)`,
+      `CREATE INDEX IF NOT EXISTS idx_user_comments_reviewed_phone ON user_comments(reviewed_phone)`,
+      `CREATE INDEX IF NOT EXISTS idx_seller_submissions_status ON seller_submissions(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_subscriptions_endpoint ON subscriptions(endpoint)`,
+      `CREATE INDEX IF NOT EXISTS idx_user_notifications_user_phone ON user_notifications(user_phone)`,
+      `CREATE INDEX IF NOT EXISTS idx_transactions_user_phone ON transactions(user_phone)`,
+      `CREATE INDEX IF NOT EXISTS idx_contact_logs_reminder_sent ON contact_logs(reminder_sent)`,
+      `CREATE INDEX IF NOT EXISTS idx_complaints_status ON complaints(status)`,
+    ];
+    for (const idx of indexes) await pgQuery(idx);
+    console.log("✅ Database indexes created.");
   } catch (err) {
     console.error("❌ Table Sync Error:", err);
   }
@@ -721,7 +757,7 @@ const uploadProperties = multer({
 });
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
 app.get("/property", async (req, res) => {
@@ -776,6 +812,8 @@ app.use(
   express.static(path.join(__dirname, "public"), {
     extensions: ["html"],
     index: false,
+    maxAge: '1h',
+    etag: true,
   })
 );
 
@@ -933,16 +971,6 @@ function getLevenshteinDistance(a, b) {
   return matrix[b.length][a.length];
 }
 
-function normalizeText(text) {
-  if (!text) return "";
-  return text
-    .replace(/(أ|إ|آ)/g, "ا")
-    .replace(/(ة)/g, "ه")
-    .replace(/(ى)/g, "ي")
-    .replace(/(ؤ|ئ)/g, "ء")
-    .toLowerCase();
-}
-
 function expandSearchKeywords(message) {
   const normalizedMsg = normalizeText(message);
   const userWords = normalizedMsg.split(/\s+/);
@@ -994,6 +1022,7 @@ app.post("/api/admin/update-prompt", async (req, res) => {
       `INSERT INTO bot_settings (setting_key, setting_value) VALUES ('system_prompt', $1) ON CONFLICT (setting_key) DO UPDATE SET setting_value = $1`,
       [newPrompt]
     );
+    invalidateBotSetting('system_prompt');
     for (const id in chatHistories) delete chatHistories[id];
     res.json({ success: true, message: "تم التحديث" });
   } catch (e) {
@@ -1010,11 +1039,8 @@ app.post("/api/chat", async (req, res) => {
     if (!message) return res.json({ reply: "" });
 
     let systemPrompt = DEFAULT_SYSTEM_INSTRUCTION;
-    const settingsRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'system_prompt'"
-    );
-    if (settingsRes.rows.length > 0)
-      systemPrompt = settingsRes.rows[0].setting_value;
+    const cachedPrompt = await getBotSetting('system_prompt');
+    if (cachedPrompt) systemPrompt = cachedPrompt;
 
     if (!chatHistories[sessionId]) {
       chatHistories[sessionId] = {
@@ -1036,6 +1062,7 @@ app.post("/api/chat", async (req, res) => {
           "INSERT INTO bot_settings (setting_key, setting_value) VALUES ('system_prompt', $1) ON CONFLICT (setting_key) DO UPDATE SET setting_value = $1",
           [updatedPrompt]
         );
+        invalidateBotSetting('system_prompt');
         delete chatHistories[sessionId].awaitingPassword;
         delete chatHistories[sessionId].pendingInstruction;
         chatHistories[sessionId].history = [
@@ -1369,11 +1396,8 @@ app.get("/api/auth/me", async (req, res) => {
     }
 
     let isPaymentActive = false;
-    const settingsRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'payment_active'"
-    );
-    if (settingsRes.rows.length > 0)
-      isPaymentActive = settingsRes.rows[0].setting_value === "true";
+    const paymentActive = await getBotSetting('payment_active');
+    isPaymentActive = paymentActive === "true";
 
     res.json({
       isAuthenticated: true,
@@ -1425,11 +1449,8 @@ app.post(
 
     if (realUser.role !== "admin") {
       try {
-        const settingsRes = await pgQuery(
-          "SELECT setting_value FROM bot_settings WHERE setting_key = 'payment_active'"
-        );
-        if (settingsRes.rows.length > 0)
-          isPaidSystem = settingsRes.rows[0].setting_value === "true";
+        const paymentActive = await getBotSetting('payment_active');
+        isPaidSystem = paymentActive === "true";
 
         if (isPaidSystem) {
           const balanceRes = await pgQuery(
@@ -2519,11 +2540,8 @@ app.put(
         return res.status(403).json({ message: "لا تملك الصلاحية" });
 
       let isPaidSystem = false;
-      const settingsRes = await pgQuery(
-        "SELECT setting_value FROM bot_settings WHERE setting_key = 'payment_active'"
-      );
-      if (settingsRes.rows.length > 0)
-        isPaidSystem = settingsRes.rows[0].setting_value === "true";
+      const paymentActive = await getBotSetting('payment_active');
+      isPaidSystem = paymentActive === "true";
 
       if (isPaidSystem && decoded.role !== "admin") {
         const balanceRes = await pgQuery(
@@ -2598,30 +2616,6 @@ app.put(
     }
   }
 );
-
-app.post("/api/admin/toggle-ban", async (req, res) => {
-  const token = req.cookies.auth_token;
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.role !== "admin")
-      return res.status(403).json({ message: "للأدمن فقط" });
-
-    const { phone, shouldBan } = req.body;
-    if (phone === ADMIN_PHONE)
-      return res.status(400).json({ message: "لا يمكن حظر الأدمن" });
-
-    await pgQuery(`UPDATE users SET is_banned = $1 WHERE phone = $2`, [
-      shouldBan,
-      phone,
-    ]);
-    res.json({
-      success: true,
-      message: shouldBan ? "تم حظر المستخدم" : "تم فك الحظر",
-    });
-  } catch (error) {
-    res.status(500).json({ message: "خطأ سيرفر" });
-  }
-});
 
 app.get("/api/admin/complaints-count", async (req, res) => {
   try {
@@ -2795,16 +2789,12 @@ app.get("/api/admin/payment-settings", async (req, res) => {
     if (decoded.role !== "admin")
       return res.status(403).json({ message: "للأدمن فقط" });
 
-    const priceRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'point_price'"
-    );
-    const activeRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'payment_active'"
-    );
+    const priceRes = await getBotSetting('point_price');
+    const activeRes = await getBotSetting('payment_active');
 
     res.json({
-      point_price: priceRes.rows[0]?.setting_value || 1,
-      is_active: activeRes.rows[0]?.setting_value === "true",
+      point_price: priceRes || 1,
+      is_active: activeRes === "true",
     });
   } catch (error) {
     console.error(error);
@@ -2834,6 +2824,8 @@ app.post("/api/admin/payment-settings", async (req, res) => {
                        ON CONFLICT (setting_key) DO UPDATE SET setting_value = $1`,
       [is_active]
     );
+    invalidateBotSetting('point_price');
+    invalidateBotSetting('payment_active');
 
     res.json({ success: true, message: "تم تحديث إعدادات الدفع بنجاح ✅" });
   } catch (error) {
@@ -2863,10 +2855,8 @@ app.post("/api/admin/manual-charge", async (req, res) => {
 
     const userId = userRes.rows[0].id;
 
-    const priceRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'point_price'"
-    );
-    const currentPrice = parseFloat(priceRes.rows[0]?.setting_value || 1);
+    const priceRes = await getBotSetting('point_price');
+    const currentPrice = parseFloat(priceRes || 1);
     const moneyValue = amount * currentPrice;
 
     await pgQuery(
@@ -2888,29 +2878,6 @@ app.post("/api/admin/manual-charge", async (req, res) => {
     res.status(500).json({ message: "خطأ سيرفر" });
   }
 });
-
-app.get("/update-db-featured", async (req, res) => {
-  try {
-    await pgQuery(
-      `ALTER TABLE properties ADD COLUMN IF NOT EXISTS "featured_expires_at" TEXT`
-    );
-    res.send("✅ تم تحديث قاعدة البيانات لإضافة تاريخ انتهاء التميز.");
-  } catch (error) {
-    res.status(500).send("❌ خطأ: " + error.message);
-  }
-});
-
-async function checkExpiredFeatured() {
-  try {
-    const now = new Date().toISOString();
-    await pgQuery(
-      `UPDATE properties SET "isFeatured" = FALSE, "featured_expires_at" = NULL WHERE "isFeatured" = TRUE AND "featured_expires_at" < $1`,
-      [now]
-    );
-  } catch (e) {
-    console.error("Expiration Check Error:", e);
-  }
-}
 
 app.post("/api/user/feature-property", async (req, res) => {
   const token = req.cookies.auth_token;
@@ -3033,10 +3000,8 @@ app.post("/api/payment/charge", async (req, res) => {
     if (!points || points < 1)
       return res.status(400).json({ message: "أقل عدد نقاط هو 1" });
 
-    const settingRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'point_price'"
-    );
-    const pricePerPoint = parseFloat(settingRes.rows[0]?.setting_value || 1);
+    const settingRes = await getBotSetting('point_price');
+    const pricePerPoint = parseFloat(settingRes || 1);
 
     const amountEGP = points * pricePerPoint;
 
@@ -3256,6 +3221,8 @@ app.post("/api/admin/settings/payment", async (req, res) => {
                        ON CONFLICT (setting_key) DO UPDATE SET setting_value = $1`,
       [isActive]
     );
+    invalidateBotSetting('point_price');
+    invalidateBotSetting('payment_active');
 
     res.json({ success: true, message: "تم حفظ الإعدادات بنجاح ✅" });
   } catch (error) {
@@ -3266,15 +3233,11 @@ app.post("/api/admin/settings/payment", async (req, res) => {
 
 app.get("/api/config/payment-price", async (req, res) => {
   try {
-    const priceRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'point_price'"
-    );
-    const activeRes = await pgQuery(
-      "SELECT setting_value FROM bot_settings WHERE setting_key = 'payment_active'"
-    );
+    const priceRes = await getBotSetting('point_price');
+    const activeRes = await getBotSetting('payment_active');
 
-    const price = parseFloat(priceRes.rows[0]?.setting_value || 1);
-    const isActive = activeRes.rows[0]?.setting_value === "true";
+    const price = parseFloat(priceRes || 1);
+    const isActive = activeRes === "true";
 
     res.json({ pointPrice: price, isPaymentActive: isActive });
   } catch (error) {
@@ -3292,37 +3255,6 @@ async function createNotification(phone, title, message, link = null) {
     console.error("Notification Error:", e);
   }
 }
-app.get("/api/user/notifications", async (req, res) => {
-  const token = req.cookies.auth_token;
-  if (!token) return res.json({ notifications: [], unreadCount: 0 });
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const result = await pgQuery(
-      `SELECT * FROM user_notifications WHERE user_phone = $1 ORDER BY id DESC LIMIT 20`,
-      [decoded.phone]
-    );
-
-    const unreadCount = result.rows.filter((n) => !n.is_read).length;
-    res.json({ notifications: result.rows, unreadCount });
-  } catch (e) {
-    res.json({ notifications: [], unreadCount: 0 });
-  }
-});
-
-app.post("/api/user/notifications/read", async (req, res) => {
-  const token = req.cookies.auth_token;
-  if (!token) return res.status(401).json({});
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    await pgQuery(
-      `UPDATE user_notifications SET is_read = TRUE WHERE user_phone = $1`,
-      [decoded.phone]
-    );
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({});
-  }
-});
 
 app.post("/api/admin/send-notification", async (req, res) => {
   const token = req.cookies.auth_token;
@@ -3895,10 +3827,8 @@ setInterval(async () => {
         today.getMonth() !== lastRunDate.getMonth() ||
         today.getFullYear() !== lastRunDate.getFullYear()
       ) {
-        const activeRes = await pgQuery(
-          "SELECT setting_value FROM bot_settings WHERE setting_key = 'payment_active'"
-        );
-        if (activeRes.rows[0]?.setting_value === "true") {
+        const activeRes = await getBotSetting('payment_active');
+        if (activeRes === "true") {
           console.log("🎁 جاري توزيع النقاط الشهرية المجانية...");
           await pgQuery("UPDATE users SET wallet_balance = wallet_balance + 2");
 
@@ -4914,10 +4844,6 @@ app.get("/services", (req, res) => {
 
 app.get("/properties", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "all-properties.html"));
-});
-
-app.get("/property", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "property-details.html"));
 });
 
 app.get("/request", (req, res) => {

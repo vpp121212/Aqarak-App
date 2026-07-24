@@ -3,6 +3,10 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
     <meta
       name="description"
       content="عقارك ليست مجرد منصة، بل هي نقلة نوعية في تاريخ السوق العقاري المصري. نحن أول منظومة متكاملة تدمج عبقرية الذكاء الاصطناعي مع الحصانة القانونية لتقديم تجربة بيع وشراء استثنائية. نضمن لك بيئة آمنة، خالية من العشوائية، ومدعومة بأحدث التقنيات لتحليل البيانات وربط الفرص بدقة متناهية، وكل ذلك نقدمه لك مجاناً لضمان حقك في سكن واستثمار آمن."
@@ -470,18 +474,6 @@
       border: 2px solid #ffd700 !important;
       box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
       transform: scale(1.02);
-    }
-    .featured-crown {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: linear-gradient(45deg, #ffd700, #ffa500);
-      color: black;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.8rem;
-      z-index: 5;
     }
 
     .load-more-btn {
@@ -1800,6 +1792,7 @@
             src="logo.png"
             alt="Aqarak"
             style="width: 40px; filter: grayscale(100%)"
+            loading="lazy"
           />
         </div>
         <div class="footer-nav-links">
@@ -2007,7 +2000,7 @@
 
         <div class="ai-console" id="ai-console">
           <div class="ai-msg ai-msg-bot">
-            <div class="ai-avatar"><img src="logo.png" alt="AI" /></div>
+            <div class="ai-avatar"><img src="logo.png" alt="AI" loading="lazy" /></div>
             <div class="ai-text">
               أهلاً بك في المستقبل 🌌<br />أنا عقارك AI. كيف يمكنني مساعدتك
               اليوم؟
@@ -2040,8 +2033,8 @@
       </div>
     </div>
 
-    <script src="home.js"></script>
-    <script src="ban-check.js"></script>
-    <script src="global-alert.js"></script>
+    <script src="home.js" defer></script>
+    <script src="ban-check.js" defer></script>
+    <script src="global-alert.js" defer></script>
   </body>
 </html>

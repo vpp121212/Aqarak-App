@@ -8,13 +8,12 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
-    "archiver": "^7.0.1",
     "axios": "^1.13.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.8.0",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "debug": "^4.4.3",
     "express": "^4.22.1",
     "express-rate-limit": "^8.2.1",
     "fs-extra": "^11.3.3",
@@ -22,13 +21,9 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
-    "node-nlp": "^3.10.2",
-    "nodemailer": "^7.0.12",
     "pg": "^8.11.3",
     "qrcode-terminal": "^0.12.0",
-    "unzipper": "^0.12.3",
     "web-push": "^3.6.7",
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#main",
-    "wwebjs-aws-s3": "^1.0.2"
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#main"
   }
 }

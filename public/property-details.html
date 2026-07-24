@@ -910,7 +910,7 @@
       <span class="close-lightbox">&times;</span>
       <button class="lightbox-btn prev-lightbox">❮</button>
       <div class="lightbox-content" style="text-align: center">
-        <img id="lightbox-img" src="" alt="صورة مكبرة" />
+        <img id="lightbox-img" src="" alt="صورة مكبرة" loading="lazy" />
         <div
           class="lightbox-counter"
           style="color: white; margin-top: 10px"
@@ -1041,13 +1041,13 @@
       <p>جميع الحقوق محفوظة © 2025 - عقارك</p>
     </footer>
 
-    <script src="guest.js"></script>
-    <script src="utils.js"></script>
+    <script src="guest.js" defer></script>
+    <script src="utils.js" defer></script>
     <script type="module" src="property-details.js"></script>
-    <script src="app.js"></script>
-    <script src="reload.js"></script>
-    <script src="ban-check.js"></script>
-    <script src="global-alert.js"></script>
+    <script src="app.js" defer></script>
+    <script src="reload.js" defer></script>
+    <script src="ban-check.js" defer></script>
+    <script src="global-alert.js" defer></script>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         let lastScrollTop = 0;

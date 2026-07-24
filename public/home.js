@@ -163,9 +163,7 @@ async function fetchLatestProperties(isFirstLoad = false) {
       }
 
       const featuredClass = prop.isFeatured ? "featured-card-glow" : "";
-      let extraBadges = prop.isFeatured
-        ? `<div class="featured-crown"><i class="fas fa-crown"></i> مميز</div>`
-        : "";
+      let extraBadges = "";
       const verifiedBadge = prop.is_verified
         ? `<i class="fas fa-check" style="background:#FFD700; color:white; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:9px; border:1px solid white; margin-left:5px; vertical-align:middle;"></i>`
         : "";
