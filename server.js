@@ -15,18 +15,22 @@ const compression = require("compression");
 
 let Client, RemoteAuth, qrcode;
 let whatsappAvailable = false;
-try {
-  ({ Client, RemoteAuth } = require("whatsapp-web.js"));
-  qrcode = require("qrcode-terminal");
-  const originalSendMessage = Client.prototype.sendMessage;
-  Client.prototype.sendMessage = async function(chatId, content, options = {}) {
-      options = options || {};
-      options.sendSeen = false;
-      return originalSendMessage.call(this, chatId, content, options);
-  };
-  whatsappAvailable = true;
-} catch (e) {
-  console.warn("⚠️ WhatsApp module not available:", e.message);
+if (process.env.WHATSAPP_ENABLED === "true") {
+  try {
+    ({ Client, RemoteAuth } = require("whatsapp-web.js"));
+    qrcode = require("qrcode-terminal");
+    const originalSendMessage = Client.prototype.sendMessage;
+    Client.prototype.sendMessage = async function(chatId, content, options = {}) {
+        options = options || {};
+        options.sendSeen = false;
+        return originalSendMessage.call(this, chatId, content, options);
+    };
+    whatsappAvailable = true;
+  } catch (e) {
+    console.warn("⚠️ WhatsApp module not available:", e.message);
+  }
+} else {
+  console.log("ℹ️ WhatsApp disabled (set WHATSAPP_ENABLED=true to enable)");
 }
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -310,7 +314,7 @@ class PostgresStore {
   }
 }
 
-const store = new PostgresStore(dbPool);
+const store = whatsappAvailable ? new PostgresStore(dbPool) : null;
 
 let whatsappClient = null;
 if (whatsappAvailable) {
