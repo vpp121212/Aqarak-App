@@ -4,7 +4,8 @@
   "description": "Real Estate Listing App",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "install": "npm install --legacy-peer-deps || true"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
