@@ -124,7 +124,7 @@ app.use(
 );
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "aqarak-secure-secret-key-2025";
-const APP_URL = "https://aqarakeg.com";
+const APP_URL = process.env.APP_URL || "https://aqarak-app-1zw5.onrender.com";
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSy_PUT_YOUR_KEY_HERE";
@@ -352,10 +352,14 @@ whatsappClient.on("ready", () => {
 
 whatsappClient.on("disconnected", (reason) => {
   console.log("❌ تم فصل الواتساب:", reason);
-  whatsappClient.initialize();
+  try { whatsappClient.initialize(); } catch(e) { console.error("WA reconnect failed:", e.message); }
 });
 
-whatsappClient.initialize();
+try {
+  whatsappClient.initialize();
+} catch(e) {
+  console.error("⚠️ WhatsApp init failed (non-critical):", e.message);
+}
 async function sendWhatsAppMessage(phone, message) {
   try {
     let formattedNumber = phone.replace(/\D/g, "");
