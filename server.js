@@ -13,14 +13,21 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const compression = require("compression");
 
-const { Client, RemoteAuth } = require("whatsapp-web.js");
-const originalSendMessage = Client.prototype.sendMessage;
-Client.prototype.sendMessage = async function(chatId, content, options = {}) {
-    options = options || {};
-    options.sendSeen = false; // ده السطر السحري اللي هيمنع الخطأ
-    return originalSendMessage.call(this, chatId, content, options);
-};
-const qrcode = require("qrcode-terminal");
+let Client, RemoteAuth, qrcode;
+let whatsappAvailable = false;
+try {
+  ({ Client, RemoteAuth } = require("whatsapp-web.js"));
+  qrcode = require("qrcode-terminal");
+  const originalSendMessage = Client.prototype.sendMessage;
+  Client.prototype.sendMessage = async function(chatId, content, options = {}) {
+      options = options || {};
+      options.sendSeen = false;
+      return originalSendMessage.call(this, chatId, content, options);
+  };
+  whatsappAvailable = true;
+} catch (e) {
+  console.warn("⚠️ WhatsApp module not available:", e.message);
+}
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cloudinary = require("cloudinary").v2;
@@ -305,62 +312,68 @@ class PostgresStore {
 
 const store = new PostgresStore(dbPool);
 
-const whatsappClient = new Client({
-  authStrategy: new RemoteAuth({
-    clientId: "aqarak-session",
-    store: store,
-    backupSyncIntervalMs: 600000,
-  }),
-  puppeteer: {
-    headless: true, // لازم يكون true
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage", // مهم جداً
-      "--disable-accelerated-2d-canvas",
-      "--no-first-run",
-      "--no-zygote",
-      "--single-process", 
-      "--disable-gpu",
-      "--disable-extensions", // قفل الإضافات
-      "--disable-component-update",
-      "--disable-default-apps",
-      "--disable-sync",
-      "--disable-background-networking",
-      "--disable-software-rasterizer", // قفل معالجة الجرافيك
-      "--mute-audio", // قفل الصوت
-      "--no-default-browser-check",
-      "--disable-features=AudioServiceOutOfProcess,IsolateOrigins,site-per-process", // بيقلل العمليات الخلفية
-      "--blink-settings=imagesEnabled=false", // 👈 بيمنع تحميل الصور تماماً (أهم سطر)
-      "--window-size=800,600"
-    ],
-    timeout: 180000, // زودنا الوقت لـ 3 دقايق
-  },
-});
-whatsappClient.on("qr", (qr) => {
-  console.log("📱 QR Code received. Scan it NOW:");
-  qrcode.generate(qr, { small: true });
-});
+let whatsappClient = null;
+if (whatsappAvailable) {
+  whatsappClient = new Client({
+    authStrategy: new RemoteAuth({
+      clientId: "aqarak-session",
+      store: store,
+      backupSyncIntervalMs: 600000,
+    }),
+    puppeteer: {
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-gpu",
+        "--disable-extensions",
+        "--disable-component-update",
+        "--disable-default-apps",
+        "--disable-sync",
+        "--disable-background-networking",
+        "--disable-software-rasterizer",
+        "--mute-audio",
+        "--no-default-browser-check",
+        "--disable-features=AudioServiceOutOfProcess,IsolateOrigins,site-per-process",
+        "--blink-settings=imagesEnabled=false",
+        "--window-size=800,600"
+      ],
+      timeout: 180000,
+    },
+  });
+  whatsappClient.on("qr", (qr) => {
+    console.log("📱 QR Code received. Scan it NOW:");
+    qrcode.generate(qr, { small: true });
+  });
 
-whatsappClient.on("remote_session_saved", () => {
-  console.log("💾 تم حفظ جلسة الواتساب في الداتابيز بنجاح!");
-});
+  whatsappClient.on("remote_session_saved", () => {
+    console.log("💾 تم حفظ جلسة الواتساب في الداتابيز بنجاح!");
+  });
 
-whatsappClient.on("ready", () => {
-  console.log("✅ الواتساب متصل وجاهز!");
-});
+  whatsappClient.on("ready", () => {
+    console.log("✅ الواتساب متصل وجاهز!");
+  });
 
-whatsappClient.on("disconnected", (reason) => {
-  console.log("❌ تم فصل الواتساب:", reason);
-  try { whatsappClient.initialize(); } catch(e) { console.error("WA reconnect failed:", e.message); }
-});
+  whatsappClient.on("disconnected", (reason) => {
+    console.log("❌ تم فصل الواتساب:", reason);
+    try { whatsappClient.initialize(); } catch(e) { console.error("WA reconnect failed:", e.message); }
+  });
 
-try {
-  whatsappClient.initialize();
-} catch(e) {
-  console.error("⚠️ WhatsApp init failed (non-critical):", e.message);
+  try {
+    whatsappClient.initialize();
+  } catch(e) {
+    console.error("⚠️ WhatsApp init failed (non-critical):", e.message);
+  }
+} else {
+  console.log("⚠️ WhatsApp disabled (module not available)");
 }
 async function sendWhatsAppMessage(phone, message) {
+  if (!whatsappClient) { console.log("WhatsApp not available"); return false; }
   try {
     let formattedNumber = phone.replace(/\D/g, "");
     if (formattedNumber.startsWith("01"))
